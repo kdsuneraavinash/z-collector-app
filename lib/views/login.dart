@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:z_collector_app/providers/progress_provider.dart';
+import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -10,12 +13,12 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Z- Collector Login")),
-      body: LoginPageForm(),
+      body: ProgressOverlay(child: LoginPageForm()),
     );
   }
 }
 
-class LoginPageForm extends StatelessWidget {
+class LoginPageForm extends ConsumerWidget {
   final _loginImage =
       "https://imgs.bharatmatrimony.com/bmimgs/login/login-otp-banner.png";
   final _formKey = GlobalKey<FormBuilderState>();
@@ -23,7 +26,7 @@ class LoginPageForm extends StatelessWidget {
   LoginPageForm({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return FormBuilder(
       key: _formKey,
       child: Column(
@@ -68,7 +71,7 @@ class LoginPageForm extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ElevatedButton(
-                  onPressed: () => _handleSubmit(context),
+                  onPressed: () => _handleSubmit(context, ref),
                   child: const Text("Submit"),
                 ),
                 TextButton(
@@ -87,7 +90,7 @@ class LoginPageForm extends StatelessWidget {
     Navigator.popAndPushNamed(context, '/register');
   }
 
-  void _handleSubmit(BuildContext context) async {
+  void _handleSubmit(BuildContext context, WidgetRef ref) async {
     final formState = _formKey.currentState!;
     if (!formState.validate()) return;
     formState.save();
@@ -95,6 +98,8 @@ class LoginPageForm extends StatelessWidget {
     final String email = formState.value['email'];
     final String password = formState.value['password'];
 
+    final progressNotifier = ref.read(progressProvider.notifier);
+    progressNotifier.start();
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
@@ -104,6 +109,8 @@ class LoginPageForm extends StatelessWidget {
         content: Text(e.message ?? 'Something went wrong!'),
         backgroundColor: Theme.of(context).errorColor,
       ));
+    } finally {
+      progressNotifier.stop();
     }
   }
 }

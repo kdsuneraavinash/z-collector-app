@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:z_collector_app/providers/progress_provider.dart';
+import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -11,19 +14,19 @@ class RegisterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Z- Collector Register")),
-      body: RegisterPageForm(),
+      body: ProgressOverlay(child: RegisterPageForm()),
     );
   }
 }
 
-class RegisterPageForm extends StatelessWidget {
+class RegisterPageForm extends ConsumerWidget {
   final _registerImage = "https://www.dc10g.com/image/login_des.png";
   final _formKey = GlobalKey<FormBuilderState>();
 
   RegisterPageForm({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return FormBuilder(
       key: _formKey,
       child: Column(
@@ -90,7 +93,7 @@ class RegisterPageForm extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ElevatedButton(
-                  onPressed: () => _handleSubmit(context),
+                  onPressed: () => _handleSubmit(context, ref),
                   child: const Text("Submit"),
                 ),
                 TextButton(
@@ -116,7 +119,7 @@ class RegisterPageForm extends StatelessWidget {
     Navigator.popAndPushNamed(context, '/login');
   }
 
-  void _handleSubmit(BuildContext context) async {
+  void _handleSubmit(BuildContext context, WidgetRef ref) async {
     final formState = _formKey.currentState!;
     if (!formState.validate()) return;
     formState.save();
@@ -125,6 +128,8 @@ class RegisterPageForm extends StatelessWidget {
     final String email = formState.value['email'];
     final String password = formState.value['password'];
 
+    final progressNotifier = ref.read(progressProvider.notifier);
+    progressNotifier.start();
     try {
       final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -138,6 +143,8 @@ class RegisterPageForm extends StatelessWidget {
         content: Text(e.message ?? 'Something went wrong!'),
         backgroundColor: Theme.of(context).errorColor,
       ));
+    } finally {
+      progressNotifier.stop();
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/views/home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:z_collector_app/views/login.dart';
@@ -21,22 +22,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        FormBuilderLocalizations.delegate,
-      ],
-      title: 'Z-Collector',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    return ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          FormBuilderLocalizations.delegate,
+        ],
+        title: 'Z-Collector',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        routes: {
+          '/home': (context) => const HomePage(),
+          '/login': (context) => const LoginPage(),
+          '/register': (context) => const RegisterPage(),
+        },
+        initialRoute: loggedIn ? '/home' : '/login',
       ),
-      routes: {
-        '/home': (context) => const HomePage(),
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-      },
-      initialRoute: loggedIn ? '/home' : '/login',
     );
   }
 }
