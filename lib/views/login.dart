@@ -55,14 +55,23 @@ class LoginPageForm extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => _handleSubmit(context),
               child: const Text("Submit"),
             ),
+            TextButton(
+                onPressed: () => _handleRegister(context),
+                child: const Text("Don't have an account? Register Now"))
           ],
         ),
       ),
     );
+  }
+
+  void _handleRegister(BuildContext context) {
+    Navigator.popAndPushNamed(context, '/register');
   }
 
   void _handleSubmit(BuildContext context) async {
@@ -78,6 +87,7 @@ class LoginPageForm extends StatelessWidget {
       final String password = formState.value['password'];
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+      Navigator.popAndPushNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.message ?? 'Something went wrong!'),
