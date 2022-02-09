@@ -1,3 +1,4 @@
+import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
 import 'package:z_collector_app/views/helpers/firestore_builders.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
-import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 import 'package:z_collector_app/views/widgets/fields/record_field.dart';
 
 class AddRecordPage extends StatelessWidget {
@@ -22,7 +22,7 @@ class AddRecordPage extends StatelessWidget {
         FirebaseFirestore.instance.collection('projects').doc(projectId);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Z- Collector Register")),
+      appBar: AppBar(title: const Text("Add New Record")),
       body: FirestoreFutureBuilder(
         future: projectRef.get(),
         builder: (context, projectData) => AddRecordPageForm(
@@ -89,7 +89,7 @@ class AddRecordPageForm extends ConsumerWidget {
   }
 
   void _handleCencel(BuildContext context) {
-    Navigator.pop(context);
+    Beamer.of(context).beamBack();
   }
 
   void _handleSubmit(BuildContext context, WidgetRef ref) async {
@@ -105,7 +105,7 @@ class AddRecordPageForm extends ConsumerWidget {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         showErrorMessage(context, 'You are logged out!');
-        Navigator.popAndPushNamed(context, '/login');
+        Beamer.of(context).beamToNamed('/login');
         return;
       }
 
@@ -120,7 +120,7 @@ class AddRecordPageForm extends ConsumerWidget {
       FirebaseFirestore.instance.collection('records').add(record.toJson());
       // TODO: Start upload tasks
       showSuccessMessage(context, 'Record is being uploaded...');
-      Navigator.pop(context);
+      Beamer.of(context).beamBack();
     } catch (e) {
       showErrorMessage(context, 'Something went wrong!! Please try again.');
     } finally {
