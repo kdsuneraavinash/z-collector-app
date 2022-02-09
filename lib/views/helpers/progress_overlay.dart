@@ -3,18 +3,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
 
 class ProgressOverlay extends ConsumerWidget {
-  final Widget child;
+  final bool loading;
+  final Widget? child;
 
-  const ProgressOverlay({Key? key, required this.child}) : super(key: key);
+  const ProgressOverlay({Key? key, this.child, this.loading = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(progressProvider);
+    final childWidget = child;
 
     return Stack(
       children: [
-        child,
-        if (progress)
+        if (childWidget != null) childWidget,
+        if (progress || loading)
           Container(
             color: Theme.of(context).scaffoldBackgroundColor.withAlpha(127),
             child: Center(

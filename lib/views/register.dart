@@ -6,6 +6,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
+import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
 import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -141,10 +142,9 @@ class RegisterPageForm extends ConsumerWidget {
           .set(user.toJson());
       Navigator.popAndPushNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message ?? 'Something went wrong!'),
-        backgroundColor: Theme.of(context).errorColor,
-      ));
+      showErrorMessage(context, e.message ?? 'Something went wrong!');
+    } catch (e) {
+      showErrorMessage(context, 'Something went wrong!');
     } finally {
       progressNotifier.stop();
     }

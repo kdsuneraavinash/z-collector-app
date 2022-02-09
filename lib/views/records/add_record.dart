@@ -1,82 +1,62 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/models/project.dart';
+import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
+import 'package:z_collector_app/views/helpers/firestore_builders.dart';
+import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
 import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 import 'package:z_collector_app/views/widgets/fields/record_field.dart';
 
 class AddRecordPage extends StatelessWidget {
-  const AddRecordPage({Key? key}) : super(key: key);
+  final String projectId;
+
+  const AddRecordPage({Key? key, required this.projectId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final projectRef =
+        FirebaseFirestore.instance.collection('projects').doc(projectId);
+
     return Scaffold(
       appBar: AppBar(title: const Text("Z- Collector Register")),
-      body: ProgressOverlay(child: AddRecordPageForm()),
+      body: FirestoreFutureBuilder(
+        future: projectRef.get(),
+        builder: (context, projectData) => AddRecordPageForm(
+          projectId: projectId,
+          project: Project.fromJson(projectData),
+        ),
+      ),
     );
   }
 }
 
 class AddRecordPageForm extends ConsumerWidget {
+  final String projectId;
+  final Project project;
   final _formKey = GlobalKey<FormBuilderState>();
 
-  AddRecordPageForm({Key? key}) : super(key: key);
+  AddRecordPageForm({Key? key, required this.projectId, required this.project})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fields = [
-      ProjectField(
-        name: "Demo Field",
-        type: ProjectFieldType.string,
-        helperText: 'This is simple helper text',
-        validators: [
-          ProjectFieldValidator(
-            type: ProjectFieldValidatorType.required,
-            value: null,
-          ),
-        ],
-        options: null,
-      ),
-      ProjectField(
-        name: "Demo Field 2",
-        type: ProjectFieldType.boolean,
-        helperText: 'This is simple helper text',
-        validators: [
-          ProjectFieldValidator(
-            type: ProjectFieldValidatorType.required,
-            value: null,
-          ),
-        ],
-        options: null,
-      ),
-      ProjectField(
-        name: "Demo Field 3",
-        type: ProjectFieldType.text,
-        helperText: 'This is simple helper text',
-        validators: [
-          ProjectFieldValidator(
-            type: ProjectFieldValidatorType.required,
-            value: null,
-          ),
-        ],
-        options: null,
-      ),
-    ];
-
     return FormBuilder(
       key: _formKey,
       child: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: fields.length,
+              itemCount: project.fields.length,
               itemBuilder: (context, index) => Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: RecordFieldWidget(
                   key: Key(index.toString()),
                   index: index,
-                  field: fields[index],
+                  field: project.fields[index],
                 ),
               ),
             ),
@@ -122,13 +102,27 @@ class AddRecordPageForm extends ConsumerWidget {
     final progressNotifier = ref.read(progressProvider.notifier);
     progressNotifier.start();
     try {
-      print(formData);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: const Text('Form cannot be submitted!'),
-            backgroundColor: Theme.of(context).errorColor),
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        showErrorMessage(context, 'You are logged out!');
+        Navigator.popAndPushNamed(context, '/login');
+        return;
+      }
+
+      final record = Record(
+        user: FirebaseFirestore.instance.collection('users').doc(user.uid),
+        project:
+            FirebaseFirestore.instance.collection('projects').doc(projectId),
+        timestamp: Timestamp.now(),
+        status: RecordStatus.done,
+        fields: project.extractValues(formData),
       );
+      FirebaseFirestore.instance.collection('records').add(record.toJson());
+      // TODO: Start upload tasks
+      showSuccessMessage(context, 'Record is being uploaded...');
+      Navigator.pop(context);
+    } catch (e) {
+      showErrorMessage(context, 'Something went wrong!! Please try again.');
     } finally {
       progressNotifier.stop();
     }

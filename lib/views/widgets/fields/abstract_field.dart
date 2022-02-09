@@ -56,5 +56,5 @@ abstract class AbstractFieldWidget extends StatelessWidget {
     }
   }
 
-  String get fieldKey => 'field_$index';
+  String get fieldKey => index.toString();
 }
