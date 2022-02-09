@@ -96,6 +96,7 @@ Map<String, dynamic> _$ProjectFieldValidatorToJson(
     };
 
 const _$ProjectFieldValidatorTypeEnumMap = {
+  ProjectFieldValidatorType.required: 'REQUIRED',
   ProjectFieldValidatorType.email: 'EMAIL',
   ProjectFieldValidatorType.integer: 'INTEGER',
   ProjectFieldValidatorType.match: 'MATCH',

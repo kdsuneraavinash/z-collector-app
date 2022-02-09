@@ -107,6 +107,8 @@ enum ProjectFieldType {
 }
 
 enum ProjectFieldValidatorType {
+  @JsonValue('REQUIRED')
+  required,
   @JsonValue('EMAIL')
   email,
   @JsonValue('INTEGER')
