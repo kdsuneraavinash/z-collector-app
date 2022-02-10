@@ -6,7 +6,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
-import 'package:z_collector_app/views/helpers/value_extractor.dart';
+import 'package:z_collector_app/views/helpers/formdata_manager.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
 import 'package:z_collector_app/views/helpers/firestore_builders.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
@@ -110,7 +110,9 @@ class AddRecordPageForm extends ConsumerWidget {
         return;
       }
 
-      final fieldValues = ValueExtractor(project).extract(formData);
+      final formDataManager = FormDataManager(
+          projectId: projectId, userId: user.uid, project: project);
+      final fieldValues = formDataManager.extract(formData);
       final record = Record(
         user: FirebaseFirestore.instance.collection('users').doc(user.uid),
         project:
@@ -120,6 +122,7 @@ class AddRecordPageForm extends ConsumerWidget {
         fields: fieldValues,
       );
       FirebaseFirestore.instance.collection('records').add(record.toJson());
+      formDataManager.startUploading();
       showSuccessMessage(context, 'Record is being uploaded...');
       Beamer.of(context).beamBack();
     } catch (e) {
