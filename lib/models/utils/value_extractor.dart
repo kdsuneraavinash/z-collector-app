@@ -28,7 +28,6 @@ class ValueExtractor {
       case ProjectFieldType.time:
         return _extractTimestamp(value);
       case ProjectFieldType.image:
-        return _extractImage(value);
       case ProjectFieldType.video:
       case ProjectFieldType.audio:
         return _extractFile(value);
@@ -40,26 +39,32 @@ class ValueExtractor {
   }
 
   Timestamp? _extractTimestamp(dynamic value) {
-    final DateTime? dateTime = value;
-    return dateTime != null ? Timestamp.fromDate(dateTime) : null;
-  }
-
-  String? _extractImage(dynamic value) {
-    // TODO: Save file location and start uploading to a path
-    // TODO: Return upload location
-    final files = List<XFile?>.from(value);
-    return files[0]?.path;
+    if (value is DateTime) return Timestamp.fromDate(value);
+    return null;
   }
 
   String? _extractFile(dynamic value) {
-    // TODO: Save file location and start uploading to a path
-    // TODO: Return upload location
-    final files = List<PlatformFile?>.from(value);
-    return files[0]?.path;
+    if (value is List<dynamic>) {
+      final firstNotNull =
+          value.firstWhere((e) => e != null, orElse: () => null);
+      if (firstNotNull is XFile) {
+        final files = List<XFile?>.from(value);
+        return files[0]?.path;
+      }
+      if (firstNotNull is PlatformFile) {
+        final files = List<PlatformFile?>.from(value);
+        return files[0]?.path;
+      }
+    }
+    return null;
   }
 
-  int? _extractNumeric(dynamic value) =>
-      value != null ? int.tryParse(value) : null;
+  int? _extractNumeric(dynamic value) {
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
 
-  String? _extractString(dynamic value) => value;
+  String? _extractString(dynamic value) {
+    return value?.toString();
+  }
 }
