@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:z_collector_app/models/project.dart';
 
 class ValueExtractor {
@@ -33,6 +34,8 @@ class ValueExtractor {
         return _extractFile(value);
       case ProjectFieldType.checkBoxes:
         return _extractMultipleNumeric(value);
+      case ProjectFieldType.location:
+        return _extractLocation(value);
       case ProjectFieldType.radio:
       case ProjectFieldType.dropdown:
       case ProjectFieldType.numeric:
@@ -48,6 +51,10 @@ class ValueExtractor {
   }
 
   String? _extractFile(dynamic value) {
+    // TODO: Create a cloud storage location to upload.
+    // TODO: Save file with the cloud storage location.
+    // TODO: Return storage URL.
+    // TODO: Start upload task later after saving form.
     if (value is List<dynamic>) {
       final firstNotNull =
           value.firstWhere((e) => e != null, orElse: () => null);
@@ -68,6 +75,11 @@ class ValueExtractor {
     // So storing as comma separated values.
     if (value is List) return List<num>.from(value).join(",");
     return "";
+  }
+
+  GeoPoint? _extractLocation(dynamic value) {
+    if (value is Position) return GeoPoint(value.latitude, value.longitude);
+    return null;
   }
 
   num? _extractNumeric(dynamic value) {
