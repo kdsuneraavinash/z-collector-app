@@ -31,6 +31,10 @@ class ValueExtractor {
       case ProjectFieldType.video:
       case ProjectFieldType.audio:
         return _extractFile(value);
+      case ProjectFieldType.checkBoxes:
+        return _extractMultipleNumeric(value);
+      case ProjectFieldType.radio:
+      case ProjectFieldType.dropdown:
       case ProjectFieldType.numeric:
         return _extractNumeric(value);
       default:
@@ -59,8 +63,16 @@ class ValueExtractor {
     return null;
   }
 
-  int? _extractNumeric(dynamic value) {
-    if (value is String) return int.tryParse(value);
+  String _extractMultipleNumeric(dynamic value) {
+    // [cloud_firestore/unknown] Invalid data. Nested arrays are not supported
+    // So storing as comma separated values.
+    if (value is List) return List<num>.from(value).join(",");
+    return "";
+  }
+
+  num? _extractNumeric(dynamic value) {
+    if (value is num) return value;
+    if (value is String) return num.tryParse(value);
     return null;
   }
 
