@@ -49,6 +49,7 @@ class AddRecordPageForm extends ConsumerWidget {
       key: _formKey,
       child: Column(
         children: [
+          const SizedBox(height: 8),
           Expanded(
             child: ListView.builder(
               itemCount: project.fields.length,
