@@ -6,6 +6,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
+import 'package:z_collector_app/models/utils/value_extractor.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
 import 'package:z_collector_app/views/helpers/firestore_builders.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
@@ -109,19 +110,20 @@ class AddRecordPageForm extends ConsumerWidget {
         return;
       }
 
+      final fieldValues = ValueExtractor(project).extract(formData);
       final record = Record(
         user: FirebaseFirestore.instance.collection('users').doc(user.uid),
         project:
             FirebaseFirestore.instance.collection('projects').doc(projectId),
         timestamp: Timestamp.now(),
         status: RecordStatus.done,
-        fields: project.extractValues(formData),
+        fields: fieldValues,
       );
       FirebaseFirestore.instance.collection('records').add(record.toJson());
-      // TODO: Start upload tasks
       showSuccessMessage(context, 'Record is being uploaded...');
       Beamer.of(context).beamBack();
     } catch (e) {
+      print(e);
       showErrorMessage(context, 'Something went wrong!! Please try again.');
     } finally {
       progressNotifier.stop();
