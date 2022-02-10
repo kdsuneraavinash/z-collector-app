@@ -35,32 +35,6 @@ class Project {
   });
 
   Map<String, dynamic> toJson() => _$ProjectToJson(this);
-
-  List<dynamic> extractValues(Map<String, dynamic> valueFields) {
-    final values = [];
-    for (int i = 0; i < fields.length; i++) {
-      final key = i.toString();
-      if (valueFields.containsKey(key)) {
-        values.add(extractValue(fields[i].type, valueFields[key]));
-      } else {
-        values.add(null);
-      }
-    }
-    return values;
-  }
-
-  dynamic extractValue(ProjectFieldType type, dynamic value) {
-    switch (type) {
-      case ProjectFieldType.dateTime:
-      case ProjectFieldType.date:
-      case ProjectFieldType.time:
-        return Timestamp.fromDate(value);
-      case ProjectFieldType.numeric:
-        return int.tryParse(value) ?? 0;
-      default:
-        return value;
-    }
-  }
 }
 
 @JsonSerializable()

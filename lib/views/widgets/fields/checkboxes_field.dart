@@ -3,7 +3,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/widgets/fields/abstract_field.dart';
 
-/// TODO: Implement this field
 class CheckBoxesFieldWidget extends AbstractFieldWidget {
   const CheckBoxesFieldWidget(
       {Key? key, required int index, required ProjectField field})
@@ -11,14 +10,21 @@ class CheckBoxesFieldWidget extends AbstractFieldWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FormBuilderTextField(
+    return FormBuilderCheckboxGroup(
       name: fieldKey,
       decoration: InputDecoration(
         label: Text(field.name),
         helperText: field.helperText,
         border: const OutlineInputBorder(),
       ),
-      validator: buildValidators(context),
+      validator: buildValidators<List<int>>(context),
+      options: [
+        for (int i = 0; i < (field.options?.length ?? 0); i++)
+          FormBuilderFieldOption<int>(
+            value: i,
+            child: Text(field.options?[i] ?? 'Not provided'),
+          )
+      ],
     );
   }
 }

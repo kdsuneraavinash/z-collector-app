@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/widgets/fields/abstract_field.dart';
 
-/// TODO: Implement this field
 class AudioFieldWidget extends AbstractFieldWidget {
   const AudioFieldWidget(
       {Key? key, required int index, required ProjectField field})
@@ -11,13 +10,16 @@ class AudioFieldWidget extends AbstractFieldWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FormBuilderTextField(
+    return FormBuilderFilePicker(
       name: fieldKey,
       decoration: InputDecoration(
         label: Text(field.name),
         helperText: field.helperText,
         border: const OutlineInputBorder(),
       ),
+      type: FileType.video,
+      maxFiles: 1,
+      previewImages: true,
       validator: buildValidators(context),
     );
   }
