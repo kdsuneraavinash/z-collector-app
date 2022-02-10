@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:z_collector_app/views/helpers/app_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:z_collector_app/views/home.dart';
 import 'package:z_collector_app/views/login.dart';
