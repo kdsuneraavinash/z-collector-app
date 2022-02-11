@@ -16,6 +16,12 @@ class HomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
+              child: const Text("Project Details"),
+              onPressed: () {
+                Beamer.of(context).beamToNamed('/project/k5KTXwyilMpQDH28w3An');
+              },
+            ),
+            ElevatedButton(
               child: const Text("Add Record"),
               onPressed: () {
                 Beamer.of(context)

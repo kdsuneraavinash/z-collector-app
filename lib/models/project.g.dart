@@ -10,18 +10,18 @@ Project _$ProjectFromJson(Map<String, dynamic> json) => Project(
       name: json['name'] as String,
       description: json['description'] as String,
       owner: const FirestoreReference()
-          .fromJson(json['owner'] as DocumentReference<Object?>),
+          .fromJson(json['owner'] as DocumentReference<Map<String, dynamic>>),
       imageUrl: json['imageUrl'] as String?,
       isPrivate: json['isPrivate'] as bool,
       isPublished: json['isPublished'] as bool,
       entryCode: json['entryCode'] as String?,
       allowedUsers: (json['allowedUsers'] as List<dynamic>)
           .map((e) => const FirestoreReference()
-              .fromJson(e as DocumentReference<Object?>))
+              .fromJson(e as DocumentReference<Map<String, dynamic>>))
           .toList(),
       blacklistedUsers: (json['blacklistedUsers'] as List<dynamic>)
           .map((e) => const FirestoreReference()
-              .fromJson(e as DocumentReference<Object?>))
+              .fromJson(e as DocumentReference<Map<String, dynamic>>))
           .toList(),
       fields: (json['fields'] as List<dynamic>)
           .map((e) => ProjectField.fromJson(e as Map<String, dynamic>))
