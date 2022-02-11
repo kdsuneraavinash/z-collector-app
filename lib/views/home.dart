@@ -18,14 +18,15 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               child: const Text("Project Details"),
               onPressed: () {
-                Beamer.of(context).beamToNamed('/project/k5KTXwyilMpQDH28w3An');
+                Beamer.of(context)
+                    .beamToNamed('/home/project/k5KTXwyilMpQDH28w3An');
               },
             ),
             ElevatedButton(
               child: const Text("Add Record"),
               onPressed: () {
-                Beamer.of(context)
-                    .beamToNamed('/project/k5KTXwyilMpQDH28w3An/record/add');
+                Beamer.of(context).beamToNamed(
+                    '/home/project/k5KTXwyilMpQDH28w3An/record/add');
               },
             ),
             ElevatedButton(

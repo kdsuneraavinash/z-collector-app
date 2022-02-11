@@ -27,24 +27,24 @@ class MyApp extends StatelessWidget {
       initialPath: loggedIn ? '/home' : '/login',
       locationBuilder: RoutesLocationBuilder(
         routes: {
-          '/home': (context, state, data) => const HomePage(),
           '/login': (context, state, data) => const LoginPage(),
           '/register': (context, state, data) => const RegisterPage(),
-          '/project/:projectId': (context, state, data) {
+          '/home': (context, state, data) => const HomePage(),
+          '/home/project/:projectId': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;
             return BeamPage(
               key: ValueKey('details$projectId'),
               title: projectId,
-              popToNamed: '/',
+              popToNamed: '/home',
               child: DetailProjectPage(projectId: projectId),
             );
           },
-          '/project/:projectId/record/add': (context, state, data) {
+          '/home/project/:projectId/record/add': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;
             return BeamPage(
               key: ValueKey('recordAdd$projectId'),
               title: projectId,
-              popToNamed: '/project/$projectId',
+              popToNamed: '/home/project/$projectId',
               child: AddRecordPage(projectId: projectId),
             );
           }
@@ -68,6 +68,8 @@ class MyApp extends StatelessWidget {
         ),
         routeInformationParser: BeamerParser(),
         routerDelegate: routerDelegate,
+        backButtonDispatcher:
+            BeamerBackButtonDispatcher(delegate: routerDelegate),
       ),
     );
   }
