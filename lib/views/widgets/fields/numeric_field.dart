@@ -11,6 +11,12 @@ class NumericFieldWidget extends AbstractFieldWidget {
 
   @override
   Widget build(BuildContext context) {
+    final validators = [FormBuilderValidators.numeric(context)];
+    final builtValidators = buildValidators(context);
+    if (builtValidators != null) {
+      validators.add(builtValidators);
+    }
+
     return FormBuilderTextField(
       name: fieldKey,
       keyboardType: TextInputType.number,
@@ -19,10 +25,7 @@ class NumericFieldWidget extends AbstractFieldWidget {
         helperText: field.helperText,
         border: const OutlineInputBorder(),
       ),
-      validator: FormBuilderValidators.compose([
-        FormBuilderValidators.numeric(context),
-        buildValidators(context) as FormFieldValidator<String>,
-      ]),
+      validator: FormBuilderValidators.compose(validators),
     );
   }
 }
