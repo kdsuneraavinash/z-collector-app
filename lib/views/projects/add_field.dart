@@ -1,0 +1,385 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:z_collector_app/models/project.dart';
+
+Map<ProjectFieldType, String> _fieldTypes = {
+  ProjectFieldType.string: 'String',
+  ProjectFieldType.numeric: 'Number',
+  ProjectFieldType.location: 'Location',
+  ProjectFieldType.image: 'Image',
+  ProjectFieldType.video: 'Video',
+  ProjectFieldType.audio: 'Audio',
+  ProjectFieldType.text: 'Text',
+  ProjectFieldType.boolean: 'Yes/No',
+  ProjectFieldType.dateTime: 'DateTime',
+  ProjectFieldType.date: 'Date',
+  ProjectFieldType.time: 'Time',
+  ProjectFieldType.dropdown: 'Dropdown',
+  ProjectFieldType.radio: 'Radio',
+  ProjectFieldType.checkBoxes: 'Check Boxes',
+};
+
+Map<ProjectFieldValidatorType, String> _validatorTypes = {
+  ProjectFieldValidatorType.required: 'Required',
+  ProjectFieldValidatorType.email: 'Email',
+  ProjectFieldValidatorType.integer: 'Integer',
+  ProjectFieldValidatorType.match: 'Match Regex',
+  ProjectFieldValidatorType.max: 'Max',
+  ProjectFieldValidatorType.min: 'Min',
+  ProjectFieldValidatorType.maxLength: 'Max Length',
+  ProjectFieldValidatorType.minLength: 'Min Length',
+  ProjectFieldValidatorType.url: 'URL',
+};
+
+class AddField extends StatefulWidget {
+  final void Function(ProjectField data) onSubmit;
+
+  const AddField({Key? key, required this.onSubmit}) : super(key: key);
+
+  @override
+  State<AddField> createState() => _AddFieldState();
+}
+
+class _AddFieldState extends State<AddField> {
+  final _formKey = GlobalKey<FormBuilderState>();
+
+  bool _hasOptions = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add New Field'),
+      content: SingleChildScrollView(
+        child: FormBuilder(
+          key: _formKey,
+          child: Column(
+            children: [
+              FormBuilderTextField(
+                name: 'name',
+                decoration: const InputDecoration(
+                  label: Text('Field Name'),
+                  border: OutlineInputBorder(),
+                ),
+                validator: FormBuilderValidators.compose(
+                  [
+                    FormBuilderValidators.required(context),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              FormBuilderDropdown<ProjectFieldType>(
+                name: 'type',
+                decoration: const InputDecoration(
+                  label: Text('Field Type'),
+                  border: OutlineInputBorder(),
+                ),
+                validator: FormBuilderValidators.compose(
+                  [FormBuilderValidators.required(context)],
+                ),
+                items: _buildTypeDropdownItems(),
+                onChanged: (value) {
+                  setState(() {
+                    _hasOptions = value == ProjectFieldType.dropdown ||
+                        value == ProjectFieldType.radio ||
+                        value == ProjectFieldType.checkBoxes;
+                  });
+                  _formKey.currentState?.fields["validators"]?.didChange(null);
+                },
+              ),
+              const SizedBox(height: 8),
+              FormBuilderTextField(
+                name: 'helperText',
+                decoration: const InputDecoration(
+                  label: Text('Helper Text'),
+                  border: OutlineInputBorder(),
+                ),
+                validator: FormBuilderValidators.compose(
+                  [
+                    FormBuilderValidators.required(context),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              _hasOptions
+                  ? Column(
+                      children: [
+                        FormBuilderField(
+                          name: 'options',
+                          validator: FormBuilderValidators.compose(
+                            [
+                              FormBuilderValidators.required(context),
+                            ],
+                          ),
+                          builder: (FormFieldState<dynamic> field) {
+                            return InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: "Options",
+                                border: const OutlineInputBorder(),
+                                errorText: field.errorText,
+                              ),
+                              child: Column(
+                                children: [
+                                  FormBuilderTextField(
+                                    name: 'tempOption',
+                                    decoration: InputDecoration(
+                                      label: const Text('Option'),
+                                      border: const OutlineInputBorder(),
+                                      suffixIcon: IconButton(
+                                        onPressed: _addOption,
+                                        icon: const Icon(Icons.add),
+                                      ),
+                                    ),
+                                  ),
+                                  ..._getOptions(),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    )
+                  : const SizedBox(),
+              FormBuilderField(
+                name: 'validators',
+                builder:
+                    (FormFieldState<Map<ProjectFieldValidatorType, dynamic>>
+                        field) {
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: "Validators",
+                      border: const OutlineInputBorder(),
+                      errorText: field.errorText,
+                    ),
+                    child: Column(
+                      children: [
+                        FormBuilderDropdown<ProjectFieldValidatorType>(
+                          name: 'tempValidator',
+                          decoration: InputDecoration(
+                            label: const Text('Validator'),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              onPressed: _addValidator,
+                              icon: const Icon(Icons.add),
+                            ),
+                          ),
+                          items: _buildValidatorsDropdownItems(),
+                        ),
+                        ..._buildValidators(),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+            ),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => _onSubmit(context),
+                child: const Text('Save'),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _onSubmit(BuildContext context) {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      final formState = _formKey.currentState!;
+
+      final List<ProjectFieldValidator> validators = [];
+      if (formState.value['validators'] != null) {
+        (formState.value['validators']
+                as Map<ProjectFieldValidatorType, dynamic>)
+            .forEach((key, value) {
+          validators.add(
+            ProjectFieldValidator(type: key, value: value),
+          );
+        });
+      }
+      final field = ProjectField(
+          name: formState.value['name'],
+          type: formState.value['type'],
+          helperText: formState.value['helperText'],
+          validators: validators,
+          options: formState.value['options']);
+      widget.onSubmit(field);
+      Navigator.pop(context);
+    }
+  }
+
+  List<DropdownMenuItem<ProjectFieldType>> _buildTypeDropdownItems() {
+    List<DropdownMenuItem<ProjectFieldType>> items = [];
+    _fieldTypes.forEach((key, value) {
+      items.add(DropdownMenuItem(
+        value: key,
+        child: Text(value),
+      ));
+    });
+    return items;
+  }
+
+  List<DropdownMenuItem<ProjectFieldValidatorType>>
+      _buildValidatorsDropdownItems() {
+    final validatorTypes = {
+      ProjectFieldValidatorType.required: "Required",
+    };
+    if (_formKey.currentState?.fields["type"]?.value != null) {
+      ProjectFieldType type = _formKey.currentState?.fields["type"]?.value;
+      if (type == ProjectFieldType.string || type == ProjectFieldType.text) {
+        validatorTypes.addAll({
+          ProjectFieldValidatorType.email: "Email",
+          ProjectFieldValidatorType.match: "Match Regex",
+          ProjectFieldValidatorType.maxLength: "Max Length",
+          ProjectFieldValidatorType.minLength: "Min Length",
+          ProjectFieldValidatorType.url: "URL",
+        });
+      }
+      if (type == ProjectFieldType.numeric) {
+        validatorTypes.addAll({
+          ProjectFieldValidatorType.max: "Max",
+          ProjectFieldValidatorType.min: "Min",
+          ProjectFieldValidatorType.integer: "Integer",
+        });
+      }
+    }
+
+    List<DropdownMenuItem<ProjectFieldValidatorType>> items = [];
+    validatorTypes.forEach((key, value) {
+      items.add(DropdownMenuItem(
+        value: key,
+        child: Text(value),
+      ));
+    });
+    return items;
+  }
+
+  void _addOption() {
+    final tempOption = _formKey.currentState?.fields["tempOption"];
+    if (tempOption?.value != null && (tempOption?.value as String).isEmpty) {
+      return;
+    }
+
+    final options = _formKey.currentState?.fields["options"];
+    List<String> newOptions = [];
+    if (options?.value != null) {
+      newOptions = options?.value;
+    }
+    newOptions.add(tempOption?.value);
+
+    options?.didChange(newOptions);
+    tempOption?.didChange("");
+  }
+
+  List<Widget> _getOptions() {
+    List<Widget> items = [];
+    if (_formKey.currentState?.fields["options"]?.value != null) {
+      List<String> options = _formKey.currentState?.fields["options"]?.value;
+      for (var i = 0; i < options.length; i++) {
+        items.add(Row(
+          children: [
+            const SizedBox(width: 16),
+            Expanded(child: Text('${i + 1}. ${options[i]}')),
+            IconButton(
+                onPressed: () {
+                  _formKey.currentState?.fields["options"]
+                      ?.didChange(options..removeAt(i));
+                },
+                icon: const Icon(Icons.remove_circle)),
+          ],
+        ));
+      }
+    }
+    return items;
+  }
+
+  void _addValidator() {
+    final temp = _formKey.currentState?.fields["tempValidator"];
+    if (temp == null || temp.value == null) {
+      return;
+    }
+
+    final validators = _formKey.currentState?.fields["validators"];
+    Map<ProjectFieldValidatorType, dynamic> newValidators = {};
+    if (validators?.value != null) {
+      newValidators = validators?.value;
+    }
+    newValidators.putIfAbsent(temp.value, () => "");
+
+    validators?.didChange(newValidators);
+    temp.didChange(null);
+  }
+
+  bool _isNumeric(ProjectFieldValidatorType type) {
+    return type == ProjectFieldValidatorType.max ||
+        type == ProjectFieldValidatorType.min ||
+        type == ProjectFieldValidatorType.maxLength ||
+        type == ProjectFieldValidatorType.minLength;
+  }
+
+  bool _hasInput(ProjectFieldValidatorType type) {
+    return type == ProjectFieldValidatorType.match || _isNumeric(type);
+  }
+
+  List<Widget> _buildValidators() {
+    List<Widget> items = [];
+    if (_formKey.currentState?.fields["validators"]?.value != null) {
+      Map<ProjectFieldValidatorType, dynamic> validators =
+          _formKey.currentState?.fields["validators"]?.value;
+
+      validators.forEach((key, value) {
+        items.add(
+          Row(
+            children: [
+              const SizedBox(width: 16),
+              Expanded(child: Text(_validatorTypes[key] ?? "")),
+              _hasInput(key)
+                  ? Expanded(
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: _isNumeric(key)
+                            ? const TextInputType.numberWithOptions(
+                                decimal: false)
+                            : null,
+                        onChanged: (val) {
+                          validators[key] =
+                              _isNumeric(key) ? int.tryParse(val) : val;
+                          _formKey.currentState?.fields["validators"]
+                              ?.didChange(validators);
+                        },
+                      ),
+                    )
+                  : const SizedBox(),
+              IconButton(
+                  onPressed: () {
+                    _formKey.currentState?.fields["validators"]
+                        ?.didChange(validators..remove(key));
+                  },
+                  icon: const Icon(Icons.remove_circle)),
+            ],
+          ),
+        );
+      });
+    }
+    return items;
+  }
+}
