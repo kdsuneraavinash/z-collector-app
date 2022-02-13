@@ -41,7 +41,7 @@ Map<String, dynamic> _$ProjectToJson(Project instance) => <String, dynamic>{
       'blacklistedUsers': instance.blacklistedUsers
           .map(const FirestoreReference().toJson)
           .toList(),
-      'fields': instance.fields,
+      'fields': instance.fields.map((e) => e.toJson()).toList(),
     };
 
 ProjectField _$ProjectFieldFromJson(Map<String, dynamic> json) => ProjectField(
@@ -60,7 +60,7 @@ Map<String, dynamic> _$ProjectFieldToJson(ProjectField instance) =>
       'name': instance.name,
       'type': _$ProjectFieldTypeEnumMap[instance.type],
       'helperText': instance.helperText,
-      'validators': instance.validators,
+      'validators': instance.validators.map((e) => e.toJson()).toList(),
       'options': instance.options,
     };
 
