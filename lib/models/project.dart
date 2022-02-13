@@ -9,13 +9,13 @@ part 'project.g.dart';
 class Project {
   final String name;
   final String description;
-  final DocumentReference owner;
+  final DocumentReference<Map<String, dynamic>> owner;
   final String? imageUrl;
   final bool isPrivate;
   final bool isPublished;
   final String? entryCode;
-  final List<DocumentReference> allowedUsers;
-  final List<DocumentReference> blacklistedUsers;
+  final List<DocumentReference<Map<String, dynamic>>> allowedUsers;
+  final List<DocumentReference<Map<String, dynamic>>> blacklistedUsers;
   final List<ProjectField> fields;
 
   factory Project.fromJson(Map<String, dynamic> json) =>

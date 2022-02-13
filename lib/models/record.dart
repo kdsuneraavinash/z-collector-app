@@ -11,8 +11,8 @@ part 'record.g.dart';
 @FirestoreTimestamp()
 @FirestoreGeoPoint()
 class Record {
-  final DocumentReference user;
-  final DocumentReference project;
+  final DocumentReference<Map<String, dynamic>> user;
+  final DocumentReference<Map<String, dynamic>> project;
   final Timestamp timestamp;
   final RecordStatus status;
   final List<dynamic> fields;
