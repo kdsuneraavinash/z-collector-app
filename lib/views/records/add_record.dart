@@ -8,7 +8,7 @@ import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/views/helpers/formdata_manager.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
-import 'package:z_collector_app/views/helpers/firestore_builders.dart';
+import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
 import 'package:z_collector_app/views/widgets/fields/record_field.dart';
 

@@ -8,9 +8,9 @@ part of 'record.dart';
 
 Record _$RecordFromJson(Map<String, dynamic> json) => Record(
       user: const FirestoreReference()
-          .fromJson(json['user'] as DocumentReference<Object?>),
+          .fromJson(json['user'] as DocumentReference<Map<String, dynamic>>),
       project: const FirestoreReference()
-          .fromJson(json['project'] as DocumentReference<Object?>),
+          .fromJson(json['project'] as DocumentReference<Map<String, dynamic>>),
       timestamp:
           const FirestoreTimestamp().fromJson(json['timestamp'] as Timestamp),
       status: $enumDecode(_$RecordStatusEnumMap, json['status']),

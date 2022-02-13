@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 
-typedef OnDataWidgetBuilder = Widget Function(
-    BuildContext context, Map<String, dynamic> data);
+typedef OnDataWidgetBuilder<T> = Widget Function(BuildContext context, T data);
 
 class FirestoreFutureBuilder extends StatelessWidget {
-  final OnDataWidgetBuilder builder;
+  final OnDataWidgetBuilder<Map<String, dynamic>> builder;
   final Future<DocumentSnapshot<Map<String, dynamic>>>? future;
 
   const FirestoreFutureBuilder(
@@ -30,7 +30,7 @@ class FirestoreFutureBuilder extends StatelessWidget {
 }
 
 class FirestoreStreamBuilder extends StatelessWidget {
-  final OnDataWidgetBuilder builder;
+  final OnDataWidgetBuilder<Map<String, dynamic>> builder;
   final Stream<DocumentSnapshot<Map<String, dynamic>>>? stream;
 
   const FirestoreStreamBuilder(
@@ -48,6 +48,28 @@ class FirestoreStreamBuilder extends StatelessWidget {
         final data = snapshot.data?.data();
         if (data == null) return const ProgressOverlay(loading: true);
         return ProgressOverlay(child: builder(context, data));
+      },
+    );
+  }
+}
+
+class FirebaseUserStreamBuilder extends StatelessWidget {
+  final OnDataWidgetBuilder<String> builder;
+
+  const FirebaseUserStreamBuilder({Key? key, required this.builder})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.userChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ErrorView(errorMessage: snapshot.error.toString());
+        }
+        final user = snapshot.data;
+        if (user == null) return const ProgressOverlay(loading: true);
+        return ProgressOverlay(child: builder(context, user.uid));
       },
     );
   }
