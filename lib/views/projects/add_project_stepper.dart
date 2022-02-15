@@ -1,8 +1,10 @@
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_image_picker/form_builder_image_picker.dart';
@@ -58,12 +60,27 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
       final formOneState = _stepOneFormKey.currentState!;
       final formThreeState = _stepThreeFormKey.currentState!;
 
-      final user = FirebaseAuth.instance.currentUser;
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+      String? imageUrl;
+      if (formOneState.value['image'] != null) {
+        List<dynamic> images = formOneState.value['image'];
+        if (images.isNotEmpty) {
+          final image = images.first as XFile;
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child(userId)
+              .child(Timestamp.now().nanoseconds.toString())
+              .child(image.name);
+          ref.putFile(File(image.path));
+          imageUrl = ref.fullPath;
+        }
+      }
+
       final project = Project(
         name: formOneState.value['name'],
         description: formOneState.value['description'],
-        owner: FirebaseFirestore.instance.collection('users').doc(user?.uid),
-        imageUrl: formOneState.value['image'],
+        owner: FirebaseFirestore.instance.collection('users').doc(userId),
+        imageUrl: imageUrl,
         isPrivate: formThreeState.value['isPrivate'] ?? false,
         isPublished: !isDraft,
         entryCode: formThreeState.value['entryCode'],
@@ -73,7 +90,6 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
       );
 
       final data = project.toJson();
-      log(data.toString());
       await FirebaseFirestore.instance.collection('projects').add(data);
 
       Beamer.of(context).beamToNamed("/home");
@@ -187,6 +203,7 @@ class _StepOne extends StatelessWidget {
               label: Text('Project Image'),
               border: OutlineInputBorder(),
             ),
+            maxImages: 1,
           )
         ],
       ),
