@@ -12,7 +12,7 @@ class NumericFieldWidget extends AbstractFieldWidget {
   @override
   Widget build(BuildContext context) {
     final validators = [FormBuilderValidators.numeric(context)];
-    final builtValidators = buildValidators(context);
+    final builtValidators = buildValidators<String>(context);
     if (builtValidators != null) {
       validators.add(builtValidators);
     }
