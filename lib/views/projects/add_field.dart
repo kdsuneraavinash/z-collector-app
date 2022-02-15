@@ -62,9 +62,7 @@ class _AddFieldState extends State<AddField> {
                   border: OutlineInputBorder(),
                 ),
                 validator: FormBuilderValidators.compose(
-                  [
-                    FormBuilderValidators.required(context),
-                  ],
+                  [FormBuilderValidators.required(context)],
                 ),
               ),
               const SizedBox(height: 8),
@@ -95,9 +93,7 @@ class _AddFieldState extends State<AddField> {
                   border: OutlineInputBorder(),
                 ),
                 validator: FormBuilderValidators.compose(
-                  [
-                    FormBuilderValidators.required(context),
-                  ],
+                  [FormBuilderValidators.required(context)],
                 ),
               ),
               const SizedBox(height: 8),
@@ -107,9 +103,7 @@ class _AddFieldState extends State<AddField> {
                         FormBuilderField(
                           name: 'options',
                           validator: FormBuilderValidators.compose(
-                            [
-                              FormBuilderValidators.required(context),
-                            ],
+                            [FormBuilderValidators.required(context)],
                           ),
                           builder: (FormFieldState<dynamic> field) {
                             return InputDecorator(
@@ -278,10 +272,7 @@ class _AddFieldState extends State<AddField> {
     }
 
     final options = _formKey.currentState?.fields["options"];
-    List<String> newOptions = [];
-    if (options?.value != null) {
-      newOptions = options?.value;
-    }
+    List<String> newOptions = options?.value ?? [];
     newOptions.add(tempOption?.value);
 
     options?.didChange(newOptions);
@@ -289,39 +280,37 @@ class _AddFieldState extends State<AddField> {
   }
 
   List<Widget> _getOptions() {
-    List<Widget> items = [];
-    if (_formKey.currentState?.fields["options"]?.value != null) {
-      List<String> options = _formKey.currentState?.fields["options"]?.value;
-      for (var i = 0; i < options.length; i++) {
-        items.add(Row(
-          children: [
-            const SizedBox(width: 16),
-            Expanded(child: Text('${i + 1}. ${options[i]}')),
-            IconButton(
-                onPressed: () {
-                  _formKey.currentState?.fields["options"]
-                      ?.didChange(options..removeAt(i));
-                },
-                icon: const Icon(Icons.remove_circle)),
-          ],
-        ));
-      }
+    final options = _formKey.currentState?.fields["options"];
+    if (options?.value != null) {
+      return (options!.value as List<String>)
+          .asMap()
+          .map((i, value) => MapEntry(
+              i,
+              Row(
+                children: [
+                  const SizedBox(width: 16),
+                  Expanded(child: Text('${i + 1}. $value')),
+                  IconButton(
+                      onPressed: () {
+                        options.didChange(options.value..removeAt(i));
+                      },
+                      icon: const Icon(Icons.remove_circle)),
+                ],
+              )))
+          .values
+          .toList();
     }
-    return items;
+    return [];
   }
 
   void _addValidator() {
     final temp = _formKey.currentState?.fields["tempValidator"];
-    if (temp == null || temp.value == null) {
-      return;
-    }
+    if (temp?.value == null) return;
 
     final validators = _formKey.currentState?.fields["validators"];
-    Map<ProjectFieldValidatorType, dynamic> newValidators = {};
-    if (validators?.value != null) {
-      newValidators = validators?.value;
-    }
-    newValidators.putIfAbsent(temp.value, () => "");
+    Map<ProjectFieldValidatorType, dynamic> newValidators =
+        validators?.value ?? {};
+    newValidators.putIfAbsent(temp!.value, () => "");
 
     validators?.didChange(newValidators);
     temp.didChange(null);
@@ -339,47 +328,48 @@ class _AddFieldState extends State<AddField> {
   }
 
   List<Widget> _buildValidators() {
-    List<Widget> items = [];
-    if (_formKey.currentState?.fields["validators"]?.value != null) {
-      Map<ProjectFieldValidatorType, dynamic> validators =
-          _formKey.currentState?.fields["validators"]?.value;
-
-      validators.forEach((key, value) {
-        items.add(
-          Row(
-            children: [
-              const SizedBox(width: 16),
-              Expanded(child: Text(_validatorTypes[key] ?? "")),
-              _hasInput(key)
-                  ? Expanded(
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: _isNumeric(key)
-                            ? const TextInputType.numberWithOptions(
-                                decimal: false)
-                            : null,
-                        onChanged: (val) {
-                          validators[key] =
-                              _isNumeric(key) ? int.tryParse(val) : val;
-                          _formKey.currentState?.fields["validators"]
-                              ?.didChange(validators);
-                        },
-                      ),
-                    )
-                  : const SizedBox(),
-              IconButton(
-                  onPressed: () {
-                    _formKey.currentState?.fields["validators"]
-                        ?.didChange(validators..remove(key));
-                  },
-                  icon: const Icon(Icons.remove_circle)),
-            ],
-          ),
-        );
-      });
+    final validators = _formKey.currentState?.fields["validators"];
+    if (validators?.value != null) {
+      return (validators!.value as Map<ProjectFieldValidatorType, dynamic>)
+          .map(
+            (key, value) => MapEntry(
+              key,
+              Row(
+                children: [
+                  const SizedBox(width: 16),
+                  Expanded(child: Text(_validatorTypes[key] ?? "")),
+                  _hasInput(key)
+                      ? Expanded(
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: _isNumeric(key)
+                                ? const TextInputType.numberWithOptions(
+                                    decimal: false)
+                                : null,
+                            onChanged: (val) {
+                              validators.value[key] =
+                                  _isNumeric(key) ? int.tryParse(val) : val;
+                              validators.didChange(validators.value);
+                            },
+                          ),
+                        )
+                      : const SizedBox(),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () {
+                      validators.didChange(validators.value..remove(key));
+                    },
+                    icon: const Icon(Icons.remove_circle),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .values
+          .toList();
     }
-    return items;
+    return [];
   }
 }

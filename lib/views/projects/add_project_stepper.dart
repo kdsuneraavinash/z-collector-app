@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,9 +20,10 @@ class AddProjectStepper extends StatefulWidget {
 
 class _AddProjectStepperState extends State<AddProjectStepper> {
   int _currentStep = 0;
-  final _formKeyOne = GlobalKey<FormBuilderState>();
   final List<ProjectField> fields = [];
-  final _formKeyThree = GlobalKey<FormBuilderState>();
+
+  final _stepOneFormKey = GlobalKey<FormBuilderState>();
+  final _stepThreeFormKey = GlobalKey<FormBuilderState>();
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,7 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
       steps: [
         Step(
           title: const Text('Project Details'),
-          content: _StepOne(formKey: _formKeyOne),
+          content: _StepOne(formKey: _stepOneFormKey),
           isActive: _currentStep >= 0,
         ),
         Step(
@@ -43,7 +46,7 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
         ),
         Step(
           title: const Text('Publish'),
-          content: _StepThree(formKey: _formKeyThree),
+          content: _StepThree(formKey: _stepThreeFormKey),
           isActive: _currentStep >= 2,
         ),
       ],
@@ -51,9 +54,9 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
   }
 
   void _onSubmit(bool isDraft) async {
-    if (_formKeyThree.currentState?.saveAndValidate() ?? false) {
-      final formOneState = _formKeyOne.currentState!;
-      final formThreeState = _formKeyThree.currentState!;
+    if (_stepThreeFormKey.currentState?.saveAndValidate() ?? false) {
+      final formOneState = _stepOneFormKey.currentState!;
+      final formThreeState = _stepThreeFormKey.currentState!;
 
       final user = FirebaseAuth.instance.currentUser;
       final project = Project(
@@ -70,6 +73,7 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
       );
 
       final data = project.toJson();
+      log(data.toString());
       await FirebaseFirestore.instance.collection('projects').add(data);
 
       Beamer.of(context).beamToNamed("/home");
@@ -78,8 +82,8 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
 
   _onContinue() {
     if (_currentStep == 0) {
-      if (_formKeyOne.currentState?.validate() ?? false) {
-        _formKeyOne.currentState?.save();
+      if (_stepOneFormKey.currentState?.validate() ?? false) {
+        _stepOneFormKey.currentState?.save();
         setState(() => _currentStep = 1);
       }
     } else if (_currentStep == 1) {
@@ -223,30 +227,31 @@ class _StepTwoState extends State<_StepTwo> {
   }
 
   void _addToFields(ProjectField field) {
-    setState(() {
-      widget.fields.add(field);
-    });
+    setState(() => widget.fields.add(field));
   }
 
   List<Widget> _buildFields() {
-    List<Widget> items = [];
-    for (var i = 0; i < widget.fields.length; i++) {
-      items.add(Row(
-        children: [
-          Expanded(
-              child: RecordFieldWidget(
-            index: i,
-            field: widget.fields[i],
-          )),
-          IconButton(
-              onPressed: () {
-                setState(() => widget.fields.removeAt(i));
-              },
-              icon: const Icon(Icons.remove_circle)),
-        ],
-      ));
-    }
-    return items;
+    return widget.fields
+        .asMap()
+        .map(
+          (i, value) => MapEntry(
+            i,
+            Row(
+              children: [
+                Expanded(
+                    child: RecordFieldWidget(
+                  index: i,
+                  field: widget.fields[i],
+                )),
+                IconButton(
+                    onPressed: () => setState(() => widget.fields.removeAt(i)),
+                    icon: const Icon(Icons.remove_circle)),
+              ],
+            ),
+          ),
+        )
+        .values
+        .toList();
   }
 }
 
