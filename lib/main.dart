@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:z_collector_app/views/home.dart';
 import 'package:z_collector_app/views/login.dart';
 import 'package:z_collector_app/views/projects/detail_project.dart';
+import 'package:z_collector_app/views/projects/add_project.dart';
 import 'package:z_collector_app/views/records/add_record.dart';
 import 'package:z_collector_app/views/register.dart';
 import 'firebase_options.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           '/login': (context, state, data) => const LoginPage(),
           '/register': (context, state, data) => const RegisterPage(),
           '/home': (context, state, data) => const HomePage(),
+          '/home/add/project': (context, state, data) => const AddProjectPage(),
           '/home/project/:projectId': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;
             return BeamPage(

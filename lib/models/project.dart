@@ -4,7 +4,7 @@ import 'package:z_collector_app/models/utils/reference.dart';
 
 part 'project.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @FirestoreReference()
 class Project {
   final String name;
@@ -37,7 +37,7 @@ class Project {
   Map<String, dynamic> toJson() => _$ProjectToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ProjectField {
   final String name;
   final ProjectFieldType type;
