@@ -113,8 +113,8 @@ class DetailProjectView extends StatelessWidget {
             child: ElevatedButton(
               child: const Text("Show All Records"),
               onPressed: () {
-                Beamer.of(context).beamToNamed(
-                    '/home/project/k5KTXwyilMpQDH28w3An/record/list');
+                Beamer.of(context)
+                    .beamToNamed('/home/project/$projectId/record/list');
               },
             ),
           ),

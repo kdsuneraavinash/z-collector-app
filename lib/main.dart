@@ -8,6 +8,7 @@ import 'package:z_collector_app/views/home.dart';
 import 'package:z_collector_app/views/login.dart';
 import 'package:z_collector_app/views/projects/detail_project.dart';
 import 'package:z_collector_app/views/projects/add_project.dart';
+import 'package:z_collector_app/views/records/detail_record.dart';
 import 'package:z_collector_app/views/records/list_record.dart';
 import 'package:z_collector_app/views/records/add_record.dart';
 import 'package:z_collector_app/views/register.dart';
@@ -58,6 +59,17 @@ class MyApp extends StatelessWidget {
               title: projectId,
               popToNamed: '/home/project/$projectId',
               child: ListRecordPage(projectId: projectId),
+            );
+          },
+          '/home/project/:projectId/record/list/:recordId':
+              (context, state, data) {
+            final projectId = state.pathParameters['projectId']!;
+            final recordId = state.pathParameters['recordId']!;
+            return BeamPage(
+              key: ValueKey('recordDetails$recordId'),
+              title: recordId,
+              popToNamed: '/home/project/$projectId/record/list',
+              child: DetailRecordPage(projectId: projectId, recordId: recordId),
             );
           }
         },

@@ -1,57 +1,82 @@
+import 'dart:math';
+
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
+import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 
-class DetailRecordage extends StatelessWidget {
+class DetailRecordPage extends StatelessWidget {
   final String projectId;
   final String recordId;
 
-  const DetailRecordage(
+  const DetailRecordPage(
       {Key? key, required this.projectId, required this.recordId})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Project Details')),
-      body: FirebaseUserStreamBuilder(
-        builder: (context, currentUserId) => FirestoreStreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('projects')
-              .doc(projectId)
-              .snapshots(),
+    // Get current user
+    return FirebaseUserStreamBuilder(
+      builder: (context, currentUserId) {
+        final projectRef =
+            FirebaseFirestore.instance.collection('projects').doc(projectId);
+        final recordRef =
+            FirebaseFirestore.instance.collection('records').doc(recordId);
+
+        // Get project
+        return FirestoreStreamBuilder(
+          stream: projectRef.snapshots(),
           builder: (context, projectMap) {
             final project = Project.fromJson(projectMap);
-            return FirestoreStreamBuilder(
-              stream: project.owner.snapshots(),
-              builder: (context, userMap) => DetailProjectView(
-                projectId: projectId,
-                project: project,
-                owner: User.fromJson(userMap),
-                currentUserId: currentUserId,
+
+            // Scaffold wrapper
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Record List'),
+              ),
+              // Guard for user is owner
+              body: FirestoreStreamBuilder(
+                stream: recordRef.snapshots(),
+                builder: (context, recordMap) {
+                  final record = Record.fromJson(recordMap);
+
+                  // User of record
+                  return FirestoreStreamBuilder(
+                    stream: record.user.snapshots(),
+                    builder: (context, userMap) => DetailRecordView(
+                      project: project,
+                      record: record,
+                      recordId: recordId,
+                      currentUserId: currentUserId,
+                      user: User.fromJson(userMap),
+                    ),
+                  );
+                },
               ),
             );
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
-class DetailProjectView extends StatelessWidget {
-  final String projectId;
+class DetailRecordView extends StatelessWidget {
   final Project project;
-  final User owner;
+  final String recordId;
+  final Record record;
+  final User user;
   final String currentUserId;
 
-  const DetailProjectView({
+  const DetailRecordView({
     Key? key,
-    required this.projectId,
     required this.project,
-    required this.owner,
+    required this.recordId,
+    required this.record,
+    required this.user,
     required this.currentUserId,
   }) : super(key: key);
 
@@ -59,68 +84,16 @@ class DetailProjectView extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuerySize = MediaQuery.of(context).size;
     final isOwner = currentUserId == project.owner.id;
-    // TODO: Complete this screen.
+    final fieldHeaders = project.fieldHeaders();
+    final fieldValues = record.fieldValues();
+    final items = min(fieldHeaders.length, fieldValues.length);
 
-    return ListView(
-      children: [
-        Stack(
-          children: [
-            Image.network(
-              project.imageUrl ?? "https://via.placeholder.com/200x200",
-              fit: BoxFit.cover,
-              color: Colors.black.withAlpha(127),
-              colorBlendMode: BlendMode.srcOver,
-              width: mediaQuerySize.width,
-            ),
-            Positioned(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  project.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 36,
-                  ),
-                ),
-              ),
-              bottom: 0,
-              left: 0,
-            )
-          ],
-        ),
-        ListTile(
-          title: Text(owner.name),
-          subtitle: const Text('Project Owner'),
-          leading: const Icon(Icons.shield),
-        ),
-        ListTile(
-          title: Text(project.isPrivate ? 'Private' : 'Public'),
-          subtitle: const Text('Project Visibility'),
-          leading: const Icon(Icons.visibility),
-        ),
-        if (isOwner)
-          ListTile(
-            title: Text(project.isPublished ? 'Published' : 'Draft'),
-            subtitle: const Text('Project Status'),
-            leading: const Icon(Icons.public),
-          ),
-        const Divider(),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(project.description),
-        ),
-        if (isOwner)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              child: const Text("Show All Records"),
-              onPressed: () {
-                Beamer.of(context).beamToNamed(
-                    '/home/project/k5KTXwyilMpQDH28w3An/record/list');
-              },
-            ),
-          ),
-      ],
+    return ListView.builder(
+      itemCount: items,
+      itemBuilder: (context, index) => ListTile(
+        title: Text(fieldHeaders[index]),
+        subtitle: Text(fieldValues[index]),
+      ),
     );
   }
 }

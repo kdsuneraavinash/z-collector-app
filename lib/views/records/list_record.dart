@@ -1,3 +1,4 @@
+import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ class ListRecordPage extends StatelessWidget {
     // Get current user
     return FirebaseUserStreamBuilder(
       builder: (context, currentUserId) {
+        final currentUserRef =
+            FirebaseFirestore.instance.collection('users').doc(currentUserId);
         final projectRef =
             FirebaseFirestore.instance.collection('projects').doc(projectId);
 
@@ -25,6 +28,15 @@ class ListRecordPage extends StatelessWidget {
           stream: projectRef.snapshots(),
           builder: (context, projectMap) {
             final project = Project.fromJson(projectMap);
+            final isOwner = (currentUserId == project.owner.id);
+
+            // Construct query
+            final recordQuery = FirebaseFirestore.instance
+                .collection('records')
+                .where('project', isEqualTo: projectRef);
+            final query = isOwner
+                ? recordQuery
+                : recordQuery.where('user', isEqualTo: currentUserRef);
 
             // Scaffold wrapper
             return Scaffold(
@@ -32,7 +44,8 @@ class ListRecordPage extends StatelessWidget {
                 title: const Text('Record List'),
                 actions: [
                   IconButton(
-                      onPressed: () => _downloadRecords(projectRef, project),
+                      onPressed: () =>
+                          _downloadRecords(projectRef, project, query),
                       icon: const Icon(Icons.download))
                 ],
               ),
@@ -40,10 +53,7 @@ class ListRecordPage extends StatelessWidget {
               body: (currentUserId == project.owner.id)
                   // Records of project
                   ? FirestoreQueryStreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('records')
-                          .where('project', isEqualTo: projectRef)
-                          .snapshots(),
+                      stream: query.snapshots(),
                       builder: (context, recordId, recordMap) {
                         final record = Record.fromJson(recordMap);
 
@@ -51,6 +61,7 @@ class ListRecordPage extends StatelessWidget {
                         return FirestoreStreamBuilder(
                           stream: record.user.snapshots(),
                           builder: (context, userMap) => ListRecordView(
+                            projectId: projectId,
                             project: project,
                             record: record,
                             recordId: recordId,
@@ -68,12 +79,10 @@ class ListRecordPage extends StatelessWidget {
     );
   }
 
-  void _downloadRecords(DocumentReference projectRef, Project project) async {
+  void _downloadRecords(DocumentReference projectRef, Project project,
+      Query<Map<String, dynamic>> query) async {
     // Get records
-    final queryResults = await FirebaseFirestore.instance
-        .collection('records')
-        .where('project', isEqualTo: projectRef)
-        .get();
+    final queryResults = await query.get();
     final records = queryResults.docs.map((e) => Record.fromJson(e.data()));
 
     // CSV headers
@@ -101,6 +110,7 @@ class ListRecordPage extends StatelessWidget {
 }
 
 class ListRecordView extends StatelessWidget {
+  final String projectId;
   final Project project;
   final String recordId;
   final Record record;
@@ -109,6 +119,7 @@ class ListRecordView extends StatelessWidget {
 
   const ListRecordView({
     Key? key,
+    required this.projectId,
     required this.project,
     required this.recordId,
     required this.record,
@@ -123,7 +134,10 @@ class ListRecordView extends StatelessWidget {
       subtitle: Text("Added by ${user.name} (${user.email})"),
       trailing:
           Text(timeago.format(record.timestamp.toDate(), locale: "en_short")),
-      onTap: () {},
+      onTap: () {
+        Beamer.of(context)
+            .beamToNamed('/home/project/$projectId/record/list/$recordId');
+      },
     );
   }
 }
