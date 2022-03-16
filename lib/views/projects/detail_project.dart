@@ -1,3 +1,4 @@
+import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
@@ -106,6 +107,17 @@ class DetailProjectView extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(project.description),
         ),
+        if (isOwner)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              child: const Text("Show All Records"),
+              onPressed: () {
+                Beamer.of(context).beamToNamed(
+                    '/home/project/k5KTXwyilMpQDH28w3An/record/list');
+              },
+            ),
+          ),
       ],
     );
   }

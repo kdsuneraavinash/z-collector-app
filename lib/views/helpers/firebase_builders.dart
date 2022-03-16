@@ -5,6 +5,9 @@ import 'package:z_collector_app/views/helpers/progress_overlay.dart';
 
 typedef OnDataWidgetBuilder<T> = Widget Function(BuildContext context, T data);
 
+typedef OnDataWidgetBuilderWithId<T> = Widget Function(
+    BuildContext context, String id, T data);
+
 class FirestoreFutureBuilder extends StatelessWidget {
   final OnDataWidgetBuilder<Map<String, dynamic>> builder;
   final Future<DocumentSnapshot<Map<String, dynamic>>>? future;
@@ -48,6 +51,35 @@ class FirestoreStreamBuilder extends StatelessWidget {
         final data = snapshot.data?.data();
         if (data == null) return const ProgressOverlay(loading: true);
         return ProgressOverlay(child: builder(context, data));
+      },
+    );
+  }
+}
+
+class FirestoreQueryStreamBuilder extends StatelessWidget {
+  final OnDataWidgetBuilderWithId<Map<String, dynamic>> builder;
+  final Stream<QuerySnapshot<Map<String, dynamic>>>? stream;
+
+  const FirestoreQueryStreamBuilder(
+      {Key? key, required this.stream, required this.builder})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ErrorView(errorMessage: snapshot.error.toString());
+        }
+        final data = snapshot.data?.docs;
+        if (data == null) return const ProgressOverlay(loading: true);
+        return ProgressOverlay(
+            child: ListView.builder(
+          itemBuilder: (context, index) =>
+              builder(context, data[index].id, data[index].data()),
+          itemCount: data.length,
+        ));
       },
     );
   }

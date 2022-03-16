@@ -28,6 +28,16 @@ class Record {
   });
 
   Map<String, dynamic> toJson() => _$RecordToJson(this);
+
+  List<String> fieldValues() => [
+        for (final field in fields)
+          if (field is Timestamp)
+            field.toDate().toIso8601String()
+          else if (field is GeoPoint)
+            "${field.longitude} ${field.latitude}"
+          else
+            field.toString()
+      ];
 }
 
 enum RecordStatus {
