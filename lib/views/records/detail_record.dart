@@ -1,12 +1,12 @@
 import 'dart:math';
 
-import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class DetailRecordPage extends StatelessWidget {
   final String projectId;
@@ -35,7 +35,7 @@ class DetailRecordPage extends StatelessWidget {
             // Scaffold wrapper
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Record List'),
+                title: const Text('Record Details'),
               ),
               // Guard for user is owner
               body: FirestoreStreamBuilder(
@@ -87,13 +87,36 @@ class DetailRecordView extends StatelessWidget {
     final fieldHeaders = project.fieldHeaders();
     final fieldValues = record.fieldValues();
     final items = min(fieldHeaders.length, fieldValues.length);
+    final timeagoMsg = timeago.format(record.timestamp.toDate());
 
-    return ListView.builder(
-      itemCount: items,
-      itemBuilder: (context, index) => ListTile(
-        title: Text(fieldHeaders[index]),
-        subtitle: Text(fieldValues[index]),
-      ),
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.numbers),
+          title: Text(recordId),
+          subtitle: const Text("Record ID"),
+        ),
+        ListTile(
+          leading: const Icon(Icons.account_circle),
+          title: Text("${user.name} (${user.email})"),
+          subtitle: const Text("Recorded by"),
+        ),
+        ListTile(
+          leading: const Icon(Icons.timer),
+          title: Text("${record.timestamp.toDate().toString()} ($timeagoMsg)"),
+          subtitle: const Text("Recorded at"),
+        ),
+        const Divider(),
+        Expanded(
+          child: ListView.builder(
+            itemCount: items,
+            itemBuilder: (context, index) => ListTile(
+              title: Text(fieldValues[index]),
+              subtitle: Text(fieldHeaders[index]),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

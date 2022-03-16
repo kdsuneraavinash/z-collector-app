@@ -32,7 +32,7 @@ class Record {
   List<String> fieldValues() => [
         for (final field in fields)
           if (field is Timestamp)
-            field.toDate().toIso8601String()
+            field.toDate().toString()
           else if (field is GeoPoint)
             "${field.longitude} ${field.latitude}"
           else

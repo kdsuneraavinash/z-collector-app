@@ -96,7 +96,7 @@ class ListRecordPage extends StatelessWidget {
     List<String> recordGen(Record record) => [
           record.user.id,
           record.project.id,
-          record.timestamp.toDate().toIso8601String(),
+          record.timestamp.toDate().toString(),
           ...record.fieldValues()
         ];
 
