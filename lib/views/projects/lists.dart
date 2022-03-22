@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:z_collector_app/views/home/home.dart';
+import 'package:z_collector_app/views/projects/list_card.dart';
 
 class ListMyProjects extends StatelessWidget {
   const ListMyProjects({Key? key}) : super(key: key);
@@ -30,7 +31,7 @@ class ListPrivateProjects extends StatelessWidget {
       title: 'Private Projects',
       query: FirebaseFirestore.instance
           .collection('projects')
-          .where('isPrivate', isNotEqualTo: false)
+          .where('isPrivate', isNotEqualTo: true)
           .get(),
     );
   }
@@ -70,7 +71,7 @@ class ListProjects extends StatelessWidget {
           builder: (context, snapshot) {
             final items = snapshot.docs.map((doc) {
               final proj = Project.fromJson(doc.data());
-              return ProjectCard(
+              return ProjectListCard(
                   title: proj.name,
                   description: proj.description,
                   imageUrl: proj.imageUrl,

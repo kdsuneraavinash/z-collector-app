@@ -8,7 +8,7 @@ import 'package:z_collector_app/views/home/home.dart';
 import 'package:z_collector_app/views/login.dart';
 import 'package:z_collector_app/views/projects/detail_project.dart';
 import 'package:z_collector_app/views/projects/add_project.dart';
-import 'package:z_collector_app/views/projects/list_projects.dart';
+import 'package:z_collector_app/views/projects/lists.dart';
 import 'package:z_collector_app/views/records/add_record.dart';
 import 'package:z_collector_app/views/register.dart';
 import 'firebase_options.dart';
