@@ -21,11 +21,8 @@ class ProjectListCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black,
-          width: 1,
-        ),
         borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).colorScheme.primary.withAlpha(20),
       ),
       child: Row(
         children: [
@@ -49,7 +46,10 @@ class ProjectListCard extends StatelessWidget {
             onPressed: () {
               Beamer.of(context).beamToNamed('/home/project/$projectId');
             },
-            icon: const Icon(Icons.chevron_right),
+            icon: Icon(
+              Icons.chevron_right,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           )
         ],
       ),

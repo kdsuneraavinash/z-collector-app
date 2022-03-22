@@ -72,7 +72,10 @@ class MyApp extends StatelessWidget {
         ],
         title: 'Z-Collector',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            secondary: Colors.orangeAccent,
+          ),
           useMaterial3: true,
         ),
         routeInformationParser: BeamerParser(),
