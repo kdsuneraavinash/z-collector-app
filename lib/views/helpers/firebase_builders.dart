@@ -75,6 +75,30 @@ class FirebaseUserStreamBuilder extends StatelessWidget {
   }
 }
 
+class FirestoreTBuilder<T> extends StatelessWidget {
+  final OnDataWidgetBuilder<T> builder;
+  final Future<T> future;
+
+  const FirestoreTBuilder(
+      {Key? key, required this.future, required this.builder})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<T>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ErrorView(errorMessage: snapshot.error.toString());
+        }
+        final data = snapshot.data;
+        if (data == null) return const ProgressOverlay(loading: true);
+        return ProgressOverlay(child: builder(context, data));
+      },
+    );
+  }
+}
+
 class ErrorView extends StatelessWidget {
   final String errorMessage;
 
