@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
+import 'package:z_collector_app/views/helpers/is_allowed.dart';
 import 'package:z_collector_app/views/widgets/storage_image.dart';
 
 class DetailProjectPage extends StatelessWidget {
@@ -15,17 +16,20 @@ class DetailProjectPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Project Details')),
-      body: FirebaseUserStreamBuilder(
-        builder: (context, currentUserId) => FirestoreStreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('projects')
-              .doc(projectId)
-              .snapshots(),
-          builder: (context, projectMap) {
-            final project = Project.fromJson(projectMap);
-            return FirestoreStreamBuilder(
+    return FirebaseUserStreamBuilder(
+      builder: (context, currentUserId) => FirestoreStreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('projects')
+            .doc(projectId)
+            .snapshots(),
+        builder: (context, projectMap) {
+          final project = Project.fromJson(projectMap);
+          final userRef =
+              FirebaseFirestore.instance.collection('users').doc(currentUserId);
+          final recordAllowed = isAllowedToAddRecord(userRef, project);
+          return Scaffold(
+            appBar: AppBar(title: const Text('Project Details')),
+            body: FirestoreStreamBuilder(
               stream: project.owner.snapshots(),
               builder: (context, userMap) => DetailProjectView(
                 projectId: projectId,
@@ -33,16 +37,19 @@ class DetailProjectPage extends StatelessWidget {
                 owner: User.fromJson(userMap),
                 currentUserId: currentUserId,
               ),
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Beamer.of(context).beamToNamed('/home/project/$projectId/record/add');
+            ),
+            floatingActionButton: recordAllowed
+                ? FloatingActionButton.extended(
+                    onPressed: () {
+                      Beamer.of(context)
+                          .beamToNamed('/home/project/$projectId/record/add');
+                    },
+                    label: const Text("Add Record"),
+                    icon: const Icon(Icons.add),
+                  )
+                : null,
+          );
         },
-        label: const Text("Add Record"),
-        icon: const Icon(Icons.add),
       ),
     );
   }
@@ -111,12 +118,23 @@ class DetailProjectView extends StatelessWidget {
         ),
         if (isOwner)
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ElevatedButton(
               child: const Text("Show All Records"),
               onPressed: () {
                 Beamer.of(context)
-                    .beamToNamed('/home/project/$projectId/record/list');
+                    .beamToNamed('/home/project/$projectId/records');
+              },
+            ),
+          ),
+        if (isOwner)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: ElevatedButton(
+              child: const Text("Show Blacklisted Users"),
+              onPressed: () {
+                Beamer.of(context)
+                    .beamToNamed('/home/project/$projectId/blacklisted');
               },
             ),
           ),

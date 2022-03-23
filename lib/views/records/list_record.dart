@@ -136,7 +136,7 @@ class ListRecordView extends StatelessWidget {
           Text(timeago.format(record.timestamp.toDate(), locale: "en_short")),
       onTap: () {
         Beamer.of(context)
-            .beamToNamed('/home/project/$projectId/record/list/$recordId');
+            .beamToNamed('/home/project/$projectId/records/$recordId');
       },
     );
   }
