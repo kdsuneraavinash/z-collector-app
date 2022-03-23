@@ -37,6 +37,13 @@ class DetailProjectPage extends StatelessWidget {
           },
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Beamer.of(context).beamToNamed('/home/project/$projectId/record/add');
+        },
+        label: const Text("Add Record"),
+        icon: const Icon(Icons.add),
+      ),
     );
   }
 }
@@ -57,7 +64,6 @@ class DetailProjectView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuerySize = MediaQuery.of(context).size;
     final isOwner = currentUserId == project.owner.id;
     // TODO: Complete this screen.
 
@@ -114,6 +120,7 @@ class DetailProjectView extends StatelessWidget {
               },
             ),
           ),
+        const SizedBox(height: 72),
       ],
     );
   }

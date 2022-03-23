@@ -12,12 +12,16 @@ class StorageImage extends StatelessWidget {
       future: storageUrl == null
           ? Future.value()
           : FirebaseStorage.instance.ref(storageUrl).getDownloadURL(),
-      builder: (context, urlSnapshot) => Image.network(
-        urlSnapshot.data ?? "https://via.placeholder.com/200x200",
-        fit: BoxFit.cover,
-        color: Colors.black.withAlpha(127),
-        colorBlendMode: BlendMode.srcOver,
-      ),
+      builder: (context, urlSnapshot) {
+        final url = urlSnapshot.data;
+        if (url == null) return Container();
+        return Image.network(
+          url,
+          fit: BoxFit.cover,
+          color: Colors.black.withAlpha(127),
+          colorBlendMode: BlendMode.srcOver,
+        );
+      },
     );
   }
 }
