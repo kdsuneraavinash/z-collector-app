@@ -68,6 +68,7 @@ const _$ProjectFieldTypeEnumMap = {
   ProjectFieldType.string: 'STRING',
   ProjectFieldType.numeric: 'NUMERIC',
   ProjectFieldType.location: 'LOCATION',
+  ProjectFieldType.locationSeries: 'LOCATION_SERIES',
   ProjectFieldType.image: 'IMAGE',
   ProjectFieldType.video: 'VIDEO',
   ProjectFieldType.audio: 'AUDIO',

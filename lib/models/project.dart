@@ -84,6 +84,8 @@ enum ProjectFieldType {
   numeric,
   @JsonValue('LOCATION')
   location,
+  @JsonValue('LOCATION_SERIES')
+  locationSeries,
   @JsonValue('IMAGE')
   image,
   @JsonValue('VIDEO')
