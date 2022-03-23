@@ -1,6 +1,5 @@
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
@@ -25,14 +24,25 @@ class DetailProjectPage extends StatelessWidget {
               .snapshots(),
           builder: (context, projectMap) {
             final project = Project.fromJson(projectMap);
-            return FirestoreStreamBuilder(
-              stream: project.owner.snapshots(),
-              builder: (context, userMap) => DetailProjectView(
-                projectId: projectId,
-                project: project,
-                owner: User.fromJson(userMap),
-                currentUserId: currentUserId,
-              ),
+            final userRef = FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUserId);
+
+            if (!project.isPrivate || project.allowedUsers.contains(userRef)) {
+              return FirestoreStreamBuilder(
+                stream: project.owner.snapshots(),
+                builder: (context, userMap) => DetailProjectView(
+                  projectId: projectId,
+                  project: project,
+                  owner: User.fromJson(userMap),
+                  currentUserId: currentUserId,
+                ),
+              );
+            }
+            return PrivateProjectEntryPage(
+              project: project,
+              projectId: projectId,
+              currentUserId: currentUserId,
             );
           },
         ),
@@ -43,6 +53,66 @@ class DetailProjectPage extends StatelessWidget {
         },
         label: const Text("Add Record"),
         icon: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class PrivateProjectEntryPage extends StatelessWidget {
+  final String projectId;
+  final Project project;
+  final String currentUserId;
+  PrivateProjectEntryPage(
+      {Key? key,
+      required this.project,
+      required this.projectId,
+      required this.currentUserId})
+      : super(key: key);
+
+  final textEdittingController = TextEditingController();
+
+  Future<void> _addPrivateProject() async {
+    if (textEdittingController.text == project.entryCode!) {
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(currentUserId);
+      final projectRef =
+          FirebaseFirestore.instance.collection('projects').doc(projectId);
+      final userMap = (await userRef.get()).data();
+      final user = User.fromJson(userMap!);
+
+      user.allowedPrivateProjects.add(projectRef);
+      project.allowedUsers.add(userRef);
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .update(user.toJson());
+
+      await FirebaseFirestore.instance
+          .collection('projects')
+          .doc(projectId)
+          .update(project.toJson());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text("Entry Code"),
+              ),
+              controller: textEdittingController,
+            ),
+          ),
+          ElevatedButton(
+              onPressed: _addPrivateProject, child: const Text('Sumbit'))
+        ]),
       ),
     );
   }
