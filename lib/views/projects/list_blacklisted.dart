@@ -31,7 +31,6 @@ class BlacklistedUserListPage extends StatelessWidget {
               final isOwner = (currentUserId == project.owner.id);
               if (!isOwner) return const Center(child: Text("Not allowed"));
 
-              // TODO: Add current user to project allowed users at project creation?
               return ListView.builder(
                 itemCount: project.allowedUsers.length,
                 itemBuilder: (context, index) {
