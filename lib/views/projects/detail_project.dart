@@ -131,7 +131,7 @@ class DetailProjectView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ElevatedButton(
-              child: const Text("Show Blacklisted Users"),
+              child: const Text("Blacklist/Allow Users"),
               onPressed: () {
                 Beamer.of(context)
                     .beamToNamed('/home/project/$projectId/blacklisted');
