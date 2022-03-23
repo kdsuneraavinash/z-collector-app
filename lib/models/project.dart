@@ -35,6 +35,8 @@ class Project {
   });
 
   Map<String, dynamic> toJson() => _$ProjectToJson(this);
+
+  List<String> fieldHeaders() => fields.map((e) => e.name).toList();
 }
 
 @JsonSerializable(explicitToJson: true)

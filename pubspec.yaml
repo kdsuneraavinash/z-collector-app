@@ -47,6 +47,8 @@ dependencies:
   cross_file: ^0.3.2
   geolocator: ^8.1.1
   firebase_storage: ^10.2.7
+  timeago: ^3.2.2
+  csv: ^5.0.1
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,11 @@
+import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
+import 'package:z_collector_app/views/widgets/storage_image.dart';
 
 class DetailProjectPage extends StatelessWidget {
   final String projectId;
@@ -34,6 +37,13 @@ class DetailProjectPage extends StatelessWidget {
           },
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Beamer.of(context).beamToNamed('/home/project/$projectId/record/add');
+        },
+        label: const Text("Add Record"),
+        icon: const Icon(Icons.add),
+      ),
     );
   }
 }
@@ -54,7 +64,6 @@ class DetailProjectView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuerySize = MediaQuery.of(context).size;
     final isOwner = currentUserId == project.owner.id;
     // TODO: Complete this screen.
 
@@ -62,13 +71,7 @@ class DetailProjectView extends StatelessWidget {
       children: [
         Stack(
           children: [
-            Image.network(
-              project.imageUrl ?? "https://via.placeholder.com/200x200",
-              fit: BoxFit.cover,
-              color: Colors.black.withAlpha(127),
-              colorBlendMode: BlendMode.srcOver,
-              width: mediaQuerySize.width,
-            ),
+            StorageImage(storageUrl: project.imageUrl),
             Positioned(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -106,6 +109,18 @@ class DetailProjectView extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(project.description),
         ),
+        if (isOwner)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              child: const Text("Show All Records"),
+              onPressed: () {
+                Beamer.of(context)
+                    .beamToNamed('/home/project/$projectId/record/list');
+              },
+            ),
+          ),
+        const SizedBox(height: 72),
       ],
     );
   }

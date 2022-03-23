@@ -1,29 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-Future<QuerySnapshot<Map<String, dynamic>>> getMyProjects() async {
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+Query<Map<String, dynamic>> getMyProjects(String currentUserId) {
+  final userRef =
+      FirebaseFirestore.instance.collection('users').doc(currentUserId);
   return FirebaseFirestore.instance
       .collection('projects')
-      .where('owner', isEqualTo: userRef)
-      .get();
+      .where('owner', isEqualTo: userRef);
 }
 
-Future<QuerySnapshot<Map<String, dynamic>>> getPrivateProjects() async {
+Query<Map<String, dynamic>> getPrivateProjects(String currentUserId) {
   // TODO: implement correct logic
-  final userId = FirebaseAuth.instance.currentUser!.uid;
-  final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+  final userRef =
+      FirebaseFirestore.instance.collection('users').doc(currentUserId);
   return FirebaseFirestore.instance
       .collection('projects')
       .where('owner', isNotEqualTo: userRef)
-      .where('isPrivate', isEqualTo: true)
-      .get();
+      .where('isPrivate', isEqualTo: true);
 }
 
-Future<QuerySnapshot<Map<String, dynamic>>> getPublicProjects() async {
+Query<Map<String, dynamic>> getPublicProjects() {
   return FirebaseFirestore.instance
       .collection('projects')
-      .where('isPrivate', isEqualTo: false)
-      .get();
+      .where('isPrivate', isEqualTo: false);
 }

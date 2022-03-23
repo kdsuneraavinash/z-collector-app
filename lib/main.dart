@@ -8,6 +8,8 @@ import 'package:z_collector_app/views/home/home.dart';
 import 'package:z_collector_app/views/login.dart';
 import 'package:z_collector_app/views/projects/detail_project.dart';
 import 'package:z_collector_app/views/projects/add_project.dart';
+import 'package:z_collector_app/views/records/detail_record.dart';
+import 'package:z_collector_app/views/records/list_record.dart';
 import 'package:z_collector_app/views/projects/lists.dart';
 import 'package:z_collector_app/views/records/add_record.dart';
 import 'package:z_collector_app/views/register.dart';
@@ -32,12 +34,11 @@ class MyApp extends StatelessWidget {
           '/login': (context, state, data) => const LoginPage(),
           '/register': (context, state, data) => const RegisterPage(),
           '/home': (context, state, data) => const HomePage(),
-          '/home/add/project': (context, state, data) => const AddProjectPage(),
-          '/home/list/project/my': (context, state, data) =>
-              const ListMyProjects(),
-          '/home/list/project/private': (context, state, data) =>
+          '/home/add-project': (context, state, data) => const AddProjectPage(),
+          '/home/my-projects': (context, state, data) => const ListMyProjects(),
+          '/home/private-projects': (context, state, data) =>
               const ListPrivateProjects(),
-          '/home/list/project/public': (context, state, data) =>
+          '/home/public-projects': (context, state, data) =>
               const ListPublicProjects(),
           '/home/project/:projectId': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;
@@ -55,6 +56,26 @@ class MyApp extends StatelessWidget {
               title: projectId,
               popToNamed: '/home/project/$projectId',
               child: AddRecordPage(projectId: projectId),
+            );
+          },
+          '/home/project/:projectId/record/list': (context, state, data) {
+            final projectId = state.pathParameters['projectId']!;
+            return BeamPage(
+              key: ValueKey('recordList$projectId'),
+              title: projectId,
+              popToNamed: '/home/project/$projectId',
+              child: ListRecordPage(projectId: projectId),
+            );
+          },
+          '/home/project/:projectId/record/list/:recordId':
+              (context, state, data) {
+            final projectId = state.pathParameters['projectId']!;
+            final recordId = state.pathParameters['recordId']!;
+            return BeamPage(
+              key: ValueKey('recordDetails$recordId'),
+              title: recordId,
+              popToNamed: '/home/project/$projectId/record/list',
+              child: DetailRecordPage(projectId: projectId, recordId: recordId),
             );
           }
         },
@@ -74,7 +95,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.blue,
-            secondary: Colors.orangeAccent,
+            secondary: Colors.red,
           ),
           useMaterial3: true,
         ),
