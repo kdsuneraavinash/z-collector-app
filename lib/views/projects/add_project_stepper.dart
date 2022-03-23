@@ -183,20 +183,20 @@ class _StepOne extends StatelessWidget {
               [FormBuilderValidators.required(context)],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           FormBuilderTextField(
             name: 'description',
             decoration: const InputDecoration(
               label: Text('Project Description'),
               border: OutlineInputBorder(),
             ),
-            maxLines: null,
+            maxLines: 3,
             keyboardType: TextInputType.multiline,
             validator: FormBuilderValidators.compose(
               [FormBuilderValidators.required(context)],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           FormBuilderImagePicker(
             name: "image",
             decoration: const InputDecoration(
@@ -204,7 +204,8 @@ class _StepOne extends StatelessWidget {
               border: OutlineInputBorder(),
             ),
             maxImages: 1,
-          )
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -253,17 +254,21 @@ class _StepTwoState extends State<_StepTwo> {
         .map(
           (i, value) => MapEntry(
             i,
-            Row(
-              children: [
-                Expanded(
-                    child: RecordFieldWidget(
-                  index: i,
-                  field: widget.fields[i],
-                )),
-                IconButton(
-                    onPressed: () => setState(() => widget.fields.removeAt(i)),
-                    icon: const Icon(Icons.remove_circle)),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: RecordFieldWidget(
+                    index: i,
+                    field: widget.fields[i],
+                  )),
+                  IconButton(
+                      onPressed: () =>
+                          setState(() => widget.fields.removeAt(i)),
+                      icon: const Icon(Icons.remove_circle)),
+                ],
+              ),
             ),
           ),
         )
@@ -307,7 +312,7 @@ class _StepThreeState extends State<_StepThree> {
                   FormBuilderTextField(
                     name: 'entryCode',
                     decoration: const InputDecoration(
-                      label: Text('Entry COde'),
+                      label: Text('Entry Code'),
                       border: OutlineInputBorder(),
                     ),
                     validator: FormBuilderValidators.compose(

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,7 @@ class HomeProjectListSection extends StatelessWidget {
   final String title;
   final String path;
   final int max;
-  final Future<QuerySnapshot<Map<String, dynamic>>> query;
+  final Query<Map<String, dynamic>> query;
 
   const HomeProjectListSection({
     Key? key,
@@ -23,57 +21,38 @@ class HomeProjectListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
         children: [
-          FirestoreTBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            future: query,
-            builder: (context, snapshot) {
-              final allItems = snapshot.docs.toList();
-              final items = allItems.sublist(0, min(max, allItems.length));
-              final itemWidgets = items.map((doc) {
-                final proj = Project.fromJson(doc.data());
-                return ProjectListCard(
-                    title: proj.name,
-                    description: proj.description,
-                    imageUrl: proj.imageUrl,
-                    projectId: doc.id);
-              }).toList();
-
-              final hasMoreButton = allItems.length > max;
-
-              return Column(children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                    hasMoreButton
-                        ? TextButton(
-                            onPressed: () {
-                              Beamer.of(context).beamToNamed(path);
-                            },
-                            child: Row(
-                              children: const [
-                                Text('More'),
-                                Icon(Icons.chevron_right)
-                              ],
-                            ))
-                        : Container(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.headline6),
+              TextButton(
+                onPressed: () => Beamer.of(context).beamToNamed(path),
+                child: Row(
+                  children: const [
+                    Text('View All'),
+                    Icon(Icons.chevron_right),
                   ],
                 ),
-                itemWidgets.isNotEmpty
-                    ? Column(
-                        children: itemWidgets,
-                      )
-                    : Container(
-                        padding: const EdgeInsets.all(8),
-                        child: const Text("Nothing to show."),
-                      ),
-              ]);
+              ),
+            ],
+          ),
+          FirestoreQueryStreamBuilder(
+            isList: false,
+            emptyWidget: const Padding(
+              padding: EdgeInsets.all(8),
+              child: Text("Nothing to show."),
+            ),
+            stream: query.limit(max).snapshots(),
+            builder: (context, projectId, projectMap) {
+              final project = Project.fromJson(projectMap);
+              return ProjectListCard(
+                projectId: projectId,
+                project: project,
+              );
             },
           ),
         ],

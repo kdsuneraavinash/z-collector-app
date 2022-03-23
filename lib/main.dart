@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           '/login': (context, state, data) => const LoginPage(),
           '/register': (context, state, data) => const RegisterPage(),
           '/home': (context, state, data) => const HomePage(),
-          '/home/add/project': (context, state, data) => const AddProjectPage(),
+          '/home/add-project': (context, state, data) => const AddProjectPage(),
           '/home/my-projects': (context, state, data) => const ListMyProjects(),
           '/home/private-projects': (context, state, data) =>
               const ListPrivateProjects(),
@@ -95,7 +95,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.blue,
-            secondary: Colors.orangeAccent,
+            secondary: Colors.red,
           ),
           useMaterial3: true,
         ),

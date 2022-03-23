@@ -10,9 +10,11 @@ class ListMyProjects extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListProjects(
-      title: 'My Projects',
-      query: getMyProjects(),
+    return FirebaseUserStreamBuilder(
+      builder: (context, currentUserId) => ListProjects(
+        title: 'My Projects',
+        query: getMyProjects(currentUserId),
+      ),
     );
   }
 }
@@ -22,9 +24,11 @@ class ListPrivateProjects extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListProjects(
-      title: 'Private Projects',
-      query: getPrivateProjects(),
+    return FirebaseUserStreamBuilder(
+      builder: (context, currentUserId) => ListProjects(
+        title: 'Private Projects',
+        query: getPrivateProjects(currentUserId),
+      ),
     );
   }
 }
@@ -43,7 +47,7 @@ class ListPublicProjects extends StatelessWidget {
 
 class ListProjects extends StatelessWidget {
   final String title;
-  final Future<QuerySnapshot<Map<String, dynamic>>> query;
+  final Query<Map<String, dynamic>> query;
 
   const ListProjects({Key? key, required this.title, required this.query})
       : super(key: key);
@@ -54,24 +58,22 @@ class ListProjects extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: SingleChildScrollView(
-        child: FirestoreTBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          future: query,
-          builder: (context, snapshot) {
-            final items = snapshot.docs.map((doc) {
-              final proj = Project.fromJson(doc.data());
-              return ProjectListCard(
-                  title: proj.name,
-                  description: proj.description,
-                  imageUrl: proj.imageUrl,
-                  projectId: doc.id);
-            }).toList();
-
-            return Column(
-              children: items,
-            );
-          },
+      body: FirestoreQueryStreamBuilder(
+        emptyWidget: const Padding(
+          padding: EdgeInsets.all(8),
+          child: Text("Nothing to show."),
         ),
+        stream: query.snapshots(),
+        builder: (context, projectId, projectMap) {
+          final project = Project.fromJson(projectMap);
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ProjectListCard(
+              projectId: projectId,
+              project: project,
+            ),
+          );
+        },
       ),
     );
   }

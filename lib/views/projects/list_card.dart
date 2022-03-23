@@ -1,18 +1,15 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
+import 'package:z_collector_app/models/project.dart';
 
 class ProjectListCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final String? imageUrl;
   final String projectId;
+  final Project project;
 
   const ProjectListCard({
     Key? key,
-    required this.title,
-    required this.description,
-    required this.imageUrl,
     required this.projectId,
+    required this.project,
   }) : super(key: key);
 
   @override
@@ -31,10 +28,10 @@ class ProjectListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  project.name,
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
-                Text(description,
+                Text(project.description,
                     textAlign: TextAlign.justify,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis),
