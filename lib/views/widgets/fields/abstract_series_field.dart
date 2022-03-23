@@ -1,26 +1,53 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
-import 'package:z_collector_app/views/widgets/fields/abstract_field.dart';
+import 'package:z_collector_app/views/widgets/fields/base_field_utils.dart';
 
-abstract class AbstractSeriesFieldWidget<T> extends AbstractFieldWidget {
+abstract class AbstractSeriesFieldWidget<T> extends StatefulWidget {
+  final int index;
+  final ProjectField field;
+
   const AbstractSeriesFieldWidget(
-      {Key? key, required int index, required ProjectField field})
-      : super(key: key, index: index, field: field);
+      {Key? key, required this.index, required this.field})
+      : super(key: key);
+
+  @override
+  State<AbstractSeriesFieldWidget<T>> createState() =>
+      _AbstractSeriesFieldWidgetState<T>();
+
+  Future<T?> collect();
+}
+
+class _AbstractSeriesFieldWidgetState<T>
+    extends State<AbstractSeriesFieldWidget<T>> {
+  List<T> data;
+  Timer? timer;
+
+  _AbstractSeriesFieldWidgetState() : data = [];
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  String get fieldKey => widget.index.toString();
 
   @override
   Widget build(BuildContext context) {
     return FormBuilderField(
       name: fieldKey,
-      validator: buildValidators(context),
-      builder: (FormFieldState<SeriesState<T>?> fieldState) {
-        final isRecording = fieldState.value?.isRecording ?? false;
+      validator: BaseFieldUtils.buildValidators(context, widget.field),
+      builder: (FormFieldState<List<T>?> fieldState) {
+        final isRecording = timer != null;
 
         return InputDecorator(
           decoration: InputDecoration(
-            label: Text(field.name),
-            helperText: field.helperText,
+            label: Text(widget.field.name),
+            helperText: widget.field.helperText,
             border: const OutlineInputBorder(),
           ),
           child: Row(
@@ -43,7 +70,7 @@ abstract class AbstractSeriesFieldWidget<T> extends AbstractFieldWidget {
               if (!isRecording && fieldState.value != null)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Records: ${fieldState.value?.data.length}'),
+                  child: Text('Records: ${fieldState.value?.length}'),
                 ),
             ],
           ),
@@ -54,11 +81,20 @@ abstract class AbstractSeriesFieldWidget<T> extends AbstractFieldWidget {
 
   void _startRecording(
     BuildContext context,
-    FormFieldState<SeriesState<T>?> fieldState,
+    FormFieldState<List<T>?> fieldState,
   ) async {
     try {
-      fieldState.didChange(SeriesState(true, fieldState.value?.data ?? []));
-      startCollecting();
+      setState(() {
+        data = fieldState.value ?? [];
+        timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+          if (mounted) {
+            final value = await widget.collect();
+            if (mounted && value != null) {
+              data.add(value);
+            }
+          }
+        });
+      });
     } catch (e) {
       showErrorMessage(context, e.toString());
       fieldState.didChange(null);
@@ -67,25 +103,17 @@ abstract class AbstractSeriesFieldWidget<T> extends AbstractFieldWidget {
 
   void _stopRecording(
     BuildContext context,
-    FormFieldState<SeriesState<T>?> fieldState,
+    FormFieldState<List<T>?> fieldState,
   ) async {
     try {
-      final data = endCollecting();
-      fieldState.didChange(SeriesState(false, data));
+      setState(() {
+        fieldState.didChange(data);
+        timer?.cancel();
+        timer = null;
+      });
     } catch (e) {
       showErrorMessage(context, e.toString());
       fieldState.didChange(null);
     }
   }
-
-  void startCollecting();
-
-  List<T> endCollecting();
-}
-
-class SeriesState<T> {
-  final bool isRecording;
-  final List<T> data;
-
-  SeriesState(this.isRecording, this.data);
 }
