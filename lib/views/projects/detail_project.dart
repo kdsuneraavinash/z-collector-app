@@ -26,9 +26,10 @@ class DetailProjectPage extends StatelessWidget {
           final userRef =
               FirebaseFirestore.instance.collection('users').doc(currentUserId);
           final recordAllowed = isAllowedToAddRecord(userRef, project);
+          final viewAllowed = isAllowedToView(userRef, project);
           return Scaffold(
             appBar: AppBar(title: const Text('Project Details')),
-            body: (!project.isPrivate || project.allowedUsers.contains(userRef))
+            body: viewAllowed
                 ? FirestoreStreamBuilder(
                     stream: project.owner.snapshots(),
                     builder: (context, userMap) => DetailProjectView(

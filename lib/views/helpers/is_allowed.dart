@@ -20,3 +20,22 @@ bool isAllowedToAddRecord(
   }
   return true;
 }
+
+bool isAllowedToView(
+    DocumentReference<Map<String, dynamic>> userRef, Project project) {
+  // if public, then allowed
+  if (!project.isPrivate) {
+    return true;
+  }
+
+  // if project owner, then allowed
+  if (project.owner.id == userRef.id) {
+    return true;
+  }
+
+  // if user in project's allowed users, then allowed
+  if (project.allowedUsers.contains(userRef)) {
+    return true;
+  }
+  return false;
+}
