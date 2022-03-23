@@ -1,9 +1,11 @@
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
+import 'package:z_collector_app/views/widgets/storage_image.dart';
 
 class DetailProjectPage extends StatelessWidget {
   final String projectId;
@@ -63,13 +65,7 @@ class DetailProjectView extends StatelessWidget {
       children: [
         Stack(
           children: [
-            Image.network(
-              project.imageUrl ?? "https://via.placeholder.com/200x200",
-              fit: BoxFit.cover,
-              color: Colors.black.withAlpha(127),
-              colorBlendMode: BlendMode.srcOver,
-              width: mediaQuerySize.width,
-            ),
+            StorageImage(storageUrl: project.imageUrl),
             Positioned(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),

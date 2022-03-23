@@ -66,11 +66,12 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
         List<dynamic> images = formOneState.value['image'];
         if (images.isNotEmpty) {
           final image = images.first as XFile;
+          final imageName = "${Timestamp.now().nanoseconds}-${image.name}";
           final ref = FirebaseStorage.instance
               .ref()
+              .child("project-images")
               .child(userId)
-              .child(Timestamp.now().nanoseconds.toString())
-              .child(image.name);
+              .child(imageName);
           ref.putFile(File(image.path));
           imageUrl = ref.fullPath;
         }
