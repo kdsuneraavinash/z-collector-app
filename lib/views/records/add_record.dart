@@ -9,6 +9,7 @@ import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/views/helpers/formdata_manager.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
+import 'package:z_collector_app/views/helpers/is_allowed.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
 import 'package:z_collector_app/views/widgets/fields/record_field.dart';
 
@@ -104,12 +105,17 @@ class AddRecordPageForm extends ConsumerWidget {
     final progressNotifier = ref.read(progressProvider.notifier);
     progressNotifier.start();
     try {
+      // Get current user
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         showErrorMessage(context, 'You are logged out!');
         Beamer.of(context).beamToNamed('/login');
         return;
       }
+      // Make sure users is able to add record
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(user.uid);
+      if (!isAllowedToAddRecord(userRef, project)) return;
 
       final formDataManager = FormDataManager(
           projectId: projectId, userId: user.uid, project: project);
@@ -122,6 +128,17 @@ class AddRecordPageForm extends ConsumerWidget {
         status: RecordStatus.done,
         fields: fieldValues,
       );
+
+      // Add current user to allowed list if not already in it
+      if (!project.allowedUsers.contains(userRef)) {
+        FirebaseFirestore.instance
+            .collection('projects')
+            .doc(projectId)
+            .update({
+          "allowedUsers": FieldValue.arrayUnion([userRef])
+        });
+      }
+      // Add record and upload
       FirebaseFirestore.instance.collection('records').add(record.toJson());
       formDataManager.startUploading();
       showSuccessMessage(context, 'Record is being uploaded...');
