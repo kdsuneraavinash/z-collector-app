@@ -16,19 +16,19 @@ class HomePage extends StatelessWidget {
           children: [
             HomeProjectListSection(
               title: "My Projects",
-              path: '/home/list/project/my',
+              path: '/home/my-projects',
               query: getMyProjects(),
             ),
             const SizedBox(height: 8),
             HomeProjectListSection(
               title: "Private Projects",
-              path: '/home/list/project/private',
+              path: '/home/private-projects',
               query: getPrivateProjects(),
             ),
             const SizedBox(height: 8),
             HomeProjectListSection(
               title: "Public Projects",
-              path: '/home/list/project/public',
+              path: '/home/public-projects',
               max: 3,
               query: getPublicProjects(),
             ),

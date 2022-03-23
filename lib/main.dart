@@ -35,11 +35,10 @@ class MyApp extends StatelessWidget {
           '/register': (context, state, data) => const RegisterPage(),
           '/home': (context, state, data) => const HomePage(),
           '/home/add/project': (context, state, data) => const AddProjectPage(),
-          '/home/list/project/my': (context, state, data) =>
-              const ListMyProjects(),
-          '/home/list/project/private': (context, state, data) =>
+          '/home/my-projects': (context, state, data) => const ListMyProjects(),
+          '/home/private-projects': (context, state, data) =>
               const ListPrivateProjects(),
-          '/home/list/project/public': (context, state, data) =>
+          '/home/public-projects': (context, state, data) =>
               const ListPublicProjects(),
           '/home/project/:projectId': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
@@ -11,7 +10,6 @@ class ListMyProjects extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
     return ListProjects(
       title: 'My Projects',
       query: getMyProjects(),
@@ -66,7 +64,7 @@ class ListProjects extends StatelessWidget {
                   title: proj.name,
                   description: proj.description,
                   imageUrl: proj.imageUrl,
-                  projectId: '');
+                  projectId: doc.id);
             }).toList();
 
             return Column(
