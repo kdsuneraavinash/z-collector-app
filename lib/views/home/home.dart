@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:z_collector_app/views/home/lists.dart';
+import 'package:z_collector_app/views/helpers/get_projects.dart';
+import 'package:z_collector_app/views/home/list_section.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,32 +14,23 @@ class HomePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            HomeProjectList(
+            HomeProjectListSection(
               title: "My Projects",
               path: '/home/list/project/my',
-              query: FirebaseFirestore.instance
-                  .collection('projects')
-                  .where('isPrivate', isNotEqualTo: true)
-                  .get(),
+              query: getMyProjects(),
             ),
             const SizedBox(height: 8),
-            HomeProjectList(
+            HomeProjectListSection(
               title: "Private Projects",
               path: '/home/list/project/private',
-              query: FirebaseFirestore.instance
-                  .collection('projects')
-                  .where('isPrivate', isNotEqualTo: true)
-                  .get(),
+              query: getPrivateProjects(),
             ),
             const SizedBox(height: 8),
-            HomeProjectList(
+            HomeProjectListSection(
               title: "Public Projects",
               path: '/home/list/project/public',
               max: 3,
-              query: FirebaseFirestore.instance
-                  .collection('projects')
-                  .where('isPrivate', isNotEqualTo: false)
-                  .get(),
+              query: getPublicProjects(),
             ),
           ],
         ),

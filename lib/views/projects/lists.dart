@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
-import 'package:z_collector_app/views/home/home.dart';
+import 'package:z_collector_app/views/helpers/get_projects.dart';
 import 'package:z_collector_app/views/projects/list_card.dart';
 
 class ListMyProjects extends StatelessWidget {
@@ -14,10 +14,7 @@ class ListMyProjects extends StatelessWidget {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     return ListProjects(
       title: 'My Projects',
-      query: FirebaseFirestore.instance
-          .collection('projects')
-          .where('owner', isEqualTo: uid)
-          .get(),
+      query: getMyProjects(),
     );
   }
 }
@@ -29,10 +26,7 @@ class ListPrivateProjects extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListProjects(
       title: 'Private Projects',
-      query: FirebaseFirestore.instance
-          .collection('projects')
-          .where('isPrivate', isNotEqualTo: true)
-          .get(),
+      query: getPrivateProjects(),
     );
   }
 }
@@ -44,10 +38,7 @@ class ListPublicProjects extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListProjects(
       title: 'Public Projects',
-      query: FirebaseFirestore.instance
-          .collection('projects')
-          .where('isPrivate', isNotEqualTo: false)
-          .get(),
+      query: getPublicProjects(),
     );
   }
 }

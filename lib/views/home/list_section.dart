@@ -7,13 +7,13 @@ import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:z_collector_app/views/projects/list_card.dart';
 
-class HomeProjectList extends StatelessWidget {
+class HomeProjectListSection extends StatelessWidget {
   final String title;
   final String path;
   final int max;
   final Future<QuerySnapshot<Map<String, dynamic>>> query;
 
-  const HomeProjectList({
+  const HomeProjectListSection({
     Key? key,
     required this.title,
     required this.path,
@@ -31,8 +31,8 @@ class HomeProjectList extends StatelessWidget {
             future: query,
             builder: (context, snapshot) {
               final allItems = snapshot.docs.toList();
-              final items =
-                  allItems.sublist(0, min(max, allItems.length)).map((doc) {
+              final items = allItems.sublist(0, min(max, allItems.length));
+              final itemWidgets = items.map((doc) {
                 final proj = Project.fromJson(doc.data());
                 return ProjectListCard(
                     title: proj.name,
@@ -65,7 +65,14 @@ class HomeProjectList extends StatelessWidget {
                         : Container(),
                   ],
                 ),
-                ...items,
+                itemWidgets.isNotEmpty
+                    ? Column(
+                        children: itemWidgets,
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(8),
+                        child: const Text("Nothing to show."),
+                      ),
               ]);
             },
           ),
