@@ -49,9 +49,12 @@ class HomeProjectListSection extends StatelessWidget {
             stream: query.limit(max).snapshots(),
             builder: (context, projectId, projectMap) {
               final project = Project.fromJson(projectMap);
-              return ProjectListCard(
-                projectId: projectId,
-                project: project,
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ProjectListCard(
+                  projectId: projectId,
+                  project: project,
+                ),
               );
             },
           ),

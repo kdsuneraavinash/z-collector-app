@@ -58,22 +58,25 @@ class ListProjects extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: FirestoreQueryStreamBuilder(
-        emptyWidget: const Padding(
-          padding: EdgeInsets.all(8),
-          child: Text("Nothing to show."),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FirestoreQueryStreamBuilder(
+          emptyWidget: const Padding(
+            padding: EdgeInsets.all(8),
+            child: Text("Nothing to show."),
+          ),
+          stream: query.snapshots(),
+          builder: (context, projectId, projectMap) {
+            final project = Project.fromJson(projectMap);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: ProjectListCard(
+                projectId: projectId,
+                project: project,
+              ),
+            );
+          },
         ),
-        stream: query.snapshots(),
-        builder: (context, projectId, projectMap) {
-          final project = Project.fromJson(projectMap);
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ProjectListCard(
-              projectId: projectId,
-              project: project,
-            ),
-          );
-        },
       ),
     );
   }
