@@ -8,6 +8,7 @@ import 'package:z_collector_app/views/home/home.dart';
 import 'package:z_collector_app/views/login.dart';
 import 'package:z_collector_app/views/projects/detail_project.dart';
 import 'package:z_collector_app/views/projects/add_project.dart';
+import 'package:z_collector_app/views/projects/list_blacklisted.dart';
 import 'package:z_collector_app/views/records/detail_record.dart';
 import 'package:z_collector_app/views/records/list_record.dart';
 import 'package:z_collector_app/views/projects/lists.dart';
@@ -58,24 +59,29 @@ class MyApp extends StatelessWidget {
               child: AddRecordPage(projectId: projectId),
             );
           },
-          '/home/project/:projectId/record/list': (context, state, data) {
+          '/home/project/:projectId/records': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;
             return BeamPage(
               key: ValueKey('recordList$projectId'),
               title: projectId,
-              popToNamed: '/home/project/$projectId',
               child: ListRecordPage(projectId: projectId),
             );
           },
-          '/home/project/:projectId/record/list/:recordId':
-              (context, state, data) {
+          '/home/project/:projectId/records/:recordId': (context, state, data) {
             final projectId = state.pathParameters['projectId']!;
             final recordId = state.pathParameters['recordId']!;
             return BeamPage(
               key: ValueKey('recordDetails$recordId'),
               title: recordId,
-              popToNamed: '/home/project/$projectId/record/list',
               child: DetailRecordPage(projectId: projectId, recordId: recordId),
+            );
+          },
+          '/home/project/:projectId/blacklisted': (context, state, data) {
+            final projectId = state.pathParameters['projectId']!;
+            return BeamPage(
+              key: ValueKey('blacklistedUsersList$projectId'),
+              title: projectId,
+              child: BlacklistedUserListPage(projectId: projectId),
             );
           }
         },

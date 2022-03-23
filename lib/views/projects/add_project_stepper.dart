@@ -77,15 +77,17 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
         }
       }
 
+      final userDocRef =
+          FirebaseFirestore.instance.collection('users').doc(userId);
       final project = Project(
         name: formOneState.value['name'],
         description: formOneState.value['description'],
-        owner: FirebaseFirestore.instance.collection('users').doc(userId),
+        owner: userDocRef,
         imageUrl: imageUrl,
         isPrivate: formThreeState.value['isPrivate'] ?? false,
         isPublished: !isDraft,
         entryCode: formThreeState.value['entryCode'],
-        allowedUsers: [],
+        allowedUsers: [userDocRef],
         blacklistedUsers: [],
         fields: fields,
       );
