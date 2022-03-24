@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/models/user.dart';
@@ -100,7 +101,9 @@ class DetailRecordView extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.timer),
-          title: Text("${record.timestamp.toDate().toString()} ($timeagoMsg)"),
+          title: Text(
+              "${DateFormat('yyyy-MM-dd - kk:mm:ss').format(record.timestamp.toDate())}"
+              " ($timeagoMsg)"),
           subtitle: const Text("Recorded at"),
         ),
         const Divider(),
