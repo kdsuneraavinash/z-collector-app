@@ -7,6 +7,7 @@ import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:z_collector_app/views/widgets/tiles/record_field_tile.dart';
 
 class DetailRecordPage extends StatelessWidget {
   final String projectId;
@@ -82,17 +83,13 @@ class DetailRecordView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuerySize = MediaQuery.of(context).size;
-    final isOwner = currentUserId == project.owner.id;
-    final fieldHeaders = project.fieldHeaders();
-    final fieldValues = record.fieldValues();
-    final items = min(fieldHeaders.length, fieldValues.length);
+    final items = min(project.fields.length, record.fields.length);
     final timeagoMsg = timeago.format(record.timestamp.toDate());
 
     return Column(
       children: [
         ListTile(
-          leading: const Icon(Icons.numbers),
+          leading: const Icon(Icons.card_membership),
           title: Text(recordId),
           subtitle: const Text("Record ID"),
         ),
@@ -110,9 +107,9 @@ class DetailRecordView extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             itemCount: items,
-            itemBuilder: (context, index) => ListTile(
-              title: Text(fieldValues[index]),
-              subtitle: Text(fieldHeaders[index]),
+            itemBuilder: (context, index) => RecordFieldTile(
+              field: project.fields[index],
+              value: record.fields[index],
             ),
           ),
         ),

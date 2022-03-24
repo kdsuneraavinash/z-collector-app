@@ -1,6 +1,5 @@
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:z_collector_app/models/project.dart';
@@ -141,8 +140,6 @@ class DetailProjectView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOwner = currentUserId == project.owner.id;
-    // TODO: Complete this screen.
-
     void _showShareDialog() async {
       final uri = await getPrivateProjectDynamicLink(projectId);
 

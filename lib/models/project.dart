@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:z_collector_app/models/utils/reference.dart';
 
@@ -129,4 +130,33 @@ enum ProjectFieldValidatorType {
   minLength,
   @JsonValue('URL')
   url,
+}
+
+class SeriesDataPoint<T> {
+  final DateTime timestamp;
+  final T dataPoint;
+
+  SeriesDataPoint._(this.timestamp, this.dataPoint);
+
+  String toRepr() {
+    final dataPoint = this.dataPoint;
+    if (dataPoint is Position) {
+      return "${timestamp.toIso8601String()}|${dataPoint.longitude}|${dataPoint.latitude}";
+    }
+    throw UnimplementedError();
+  }
+
+  factory SeriesDataPoint(T dataPoint) {
+    return SeriesDataPoint._(DateTime.now(), dataPoint);
+  }
+
+  static SeriesDataPoint<Position> positionFromRepr(String repr) {
+    final values = repr.split("|");
+    final timestamp =
+        DateTime.tryParse(values[0]) ?? DateTime.fromMicrosecondsSinceEpoch(0);
+    final longitude = double.tryParse(values[1]) ?? 0;
+    final latitude = double.tryParse(values[2]) ?? 0;
+    return SeriesDataPoint._(timestamp,
+        Position.fromMap({"longitude": longitude, "latitude": latitude}));
+  }
 }

@@ -23,10 +23,7 @@ abstract class AbstractSeriesFieldWidget<T> extends StatefulWidget {
 
 class _AbstractSeriesFieldWidgetState<T>
     extends State<AbstractSeriesFieldWidget<T>> {
-  List<T> data;
   Timer? timer;
-
-  _AbstractSeriesFieldWidgetState() : data = [];
 
   @override
   void dispose() {
@@ -41,7 +38,7 @@ class _AbstractSeriesFieldWidgetState<T>
     return FormBuilderField(
       name: fieldKey,
       validator: BaseFieldUtils.buildValidators(context, widget.field),
-      builder: (FormFieldState<List<T>?> fieldState) {
+      builder: (FormFieldState<List<SeriesDataPoint<T>>?> fieldState) {
         final isRecording = timer != null;
 
         return InputDecorator(
@@ -52,21 +49,32 @@ class _AbstractSeriesFieldWidgetState<T>
           ),
           child: Row(
             children: [
+              // Stop Button - when recording
               if (isRecording)
                 ElevatedButton(
                   child: const Text('Stop'),
                   onPressed: () => _stopRecording(context, fieldState),
                 ),
+              // Start Button - when not recording
               if (!isRecording)
                 ElevatedButton(
                   child: const Text('Start'),
                   onPressed: () => _startRecording(context, fieldState),
                 ),
-              if (isRecording)
+              // Recording text - when recording but not recorded yet
+              if (isRecording && fieldState.value == null)
                 const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text('Recording...'),
+                  child: Text('Preparing to record'),
                 ),
+              // Recording text - when recording
+              if (isRecording && fieldState.value != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child:
+                      Text('Recording... Records: ${fieldState.value?.length}'),
+                ),
+              // Recording text - when not recording
               if (!isRecording && fieldState.value != null)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -81,16 +89,18 @@ class _AbstractSeriesFieldWidgetState<T>
 
   void _startRecording(
     BuildContext context,
-    FormFieldState<List<T>?> fieldState,
+    FormFieldState<List<SeriesDataPoint<T>>?> fieldState,
   ) async {
     try {
       setState(() {
-        data = fieldState.value ?? [];
         timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
           if (mounted) {
             final value = await widget.collect();
             if (mounted && value != null) {
-              data.add(value);
+              setState(() {
+                final dataPoint = SeriesDataPoint<T>(value);
+                fieldState.didChange([...fieldState.value ?? [], dataPoint]);
+              });
             }
           }
         });
@@ -103,11 +113,10 @@ class _AbstractSeriesFieldWidgetState<T>
 
   void _stopRecording(
     BuildContext context,
-    FormFieldState<List<T>?> fieldState,
+    FormFieldState<List<SeriesDataPoint<T>>?> fieldState,
   ) async {
     try {
       setState(() {
-        fieldState.didChange(data);
         timer?.cancel();
         timer = null;
       });
