@@ -82,17 +82,13 @@ class DetailRecordView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuerySize = MediaQuery.of(context).size;
-    final isOwner = currentUserId == project.owner.id;
-    final fieldHeaders = project.fieldHeaders();
-    final fieldValues = record.fieldValues();
-    final items = min(fieldHeaders.length, fieldValues.length);
+    final items = min(project.fields.length, record.fields.length);
     final timeagoMsg = timeago.format(record.timestamp.toDate());
 
     return Column(
       children: [
         ListTile(
-          leading: const Icon(Icons.numbers),
+          leading: const Icon(Icons.card_membership),
           title: Text(recordId),
           subtitle: const Text("Record ID"),
         ),
@@ -110,13 +106,125 @@ class DetailRecordView extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             itemCount: items,
-            itemBuilder: (context, index) => ListTile(
-              title: Text(fieldValues[index]),
-              subtitle: Text(fieldHeaders[index]),
+            itemBuilder: (context, index) => RecordFieldTile(
+              field: project.fields[index],
+              value: record.fields[index],
             ),
           ),
         ),
       ],
     );
+  }
+}
+
+class RecordFieldTile extends StatelessWidget {
+  final ProjectField field;
+  final dynamic value;
+
+  const RecordFieldTile({Key? key, required this.field, required this.value})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final value = this.value;
+    if (field.type == ProjectFieldType.location) {
+      if (value is GeoPoint) {
+        return ListTile(
+            title: Text("${value.longitude}, ${value.latitude}"),
+            subtitle: Text(field.name),
+            leading: const Icon(Icons.map),
+            trailing: const Icon(Icons.open_in_browser),
+            onTap: () {
+              // TODO: Open in google maps
+            });
+      }
+    }
+
+    if (field.type == ProjectFieldType.boolean) {
+      final selected = value == "true";
+      return ListTile(
+        title: Text(field.name),
+        subtitle: Text(selected ? "Yes" : "No"),
+        leading: Icon(selected ? Icons.check : Icons.close),
+      );
+    }
+
+    if (field.type == ProjectFieldType.date ||
+        field.type == ProjectFieldType.dateTime ||
+        field.type == ProjectFieldType.time) {
+      if (value is Timestamp) {
+        // TODO: Hide date if time or time if date type
+        return ListTile(
+          title: Text(value.toDate().toString()),
+          subtitle: Text(field.name),
+          leading: const Icon(Icons.event),
+        );
+      }
+    }
+
+    if (field.type == ProjectFieldType.video ||
+        field.type == ProjectFieldType.audio ||
+        field.type == ProjectFieldType.image) {
+      return ListTile(
+          title: Text(field.name),
+          leading: const Icon(Icons.attach_file),
+          trailing: const Icon(Icons.open_in_browser),
+          onTap: () {
+            // TODO: Open in browser
+          });
+    }
+
+    if (field.type == ProjectFieldType.locationSeries) {
+      return buildTable(context,
+          title: field.name,
+          columns: ["Time", "Longitude", "Latitude"],
+          data: value.toString().split(",").map((e) => e.split("|")).toList());
+    }
+
+    return ListTile(
+      title: Text(value.toString()),
+      subtitle: Text(field.name),
+      leading: Icon(
+        field.type == ProjectFieldType.numeric
+            ? Icons.one_k
+            : field.type == ProjectFieldType.radio ||
+                    field.type == ProjectFieldType.dropdown
+                ? Icons.select_all
+                : field.type == ProjectFieldType.checkBoxes
+                    ? Icons.mp_outlined
+                    : Icons.description,
+      ),
+    );
+  }
+
+  Widget buildTable(BuildContext context,
+      {required String title,
+      required List<String> columns,
+      required List<List<String>> data}) {
+    return Column(
+      children: [
+        Text(title, style: Theme.of(context).textTheme.bodyText2),
+        DataTable(
+          columns: [
+            for (int i = 0; i < columns.length; i++)
+              DataColumn(label: Text(columns[i]))
+          ],
+          rows: [
+            for (int i = 0; i < data.length; i++)
+              DataRow(cells: [
+                DataCell(Text(extractTime(DateTime.tryParse(data[i][0])))),
+                DataCell(Text(data[i][1])),
+                DataCell(Text(data[i][2]))
+              ])
+          ],
+        ),
+      ],
+    );
+  }
+
+  String extractTime(DateTime? timestamp) {
+    final timestampVal = timestamp;
+    if (timestampVal == null) return "";
+    return "${timestampVal.hour}:${timestampVal.minute}:${timestampVal.second}";
   }
 }
