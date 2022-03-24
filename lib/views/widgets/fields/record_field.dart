@@ -9,6 +9,7 @@ import 'package:z_collector_app/views/widgets/fields/datetime_field.dart';
 import 'package:z_collector_app/views/widgets/fields/dropdown_field.dart';
 import 'package:z_collector_app/views/widgets/fields/image_field.dart';
 import 'package:z_collector_app/views/widgets/fields/location_field.dart';
+import 'package:z_collector_app/views/widgets/fields/location_series_field.dart';
 import 'package:z_collector_app/views/widgets/fields/numeric_field.dart';
 import 'package:z_collector_app/views/widgets/fields/radio_field.dart';
 import 'package:z_collector_app/views/widgets/fields/string_field.dart';
@@ -30,6 +31,8 @@ class RecordFieldWidget extends AbstractFieldWidget {
         return NumericFieldWidget(index: index, field: field);
       case ProjectFieldType.location:
         return LocationFieldWidget(index: index, field: field);
+      case ProjectFieldType.locationSeries:
+        return LocationSeriesFieldWidget(index: index, field: field);
       case ProjectFieldType.image:
         return ImageFieldWidget(index: index, field: field);
       case ProjectFieldType.video:
