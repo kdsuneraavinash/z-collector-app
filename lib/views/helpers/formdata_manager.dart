@@ -90,8 +90,8 @@ class FormDataManager {
 
   String? _extractLocationSeries(dynamic value) {
     if (value is List) {
-      return List<Position>.from(value)
-          .map((e) => "(${e.longitude} ${e.latitude})")
+      return List<SeriesDataPoint<Position>>.from(value)
+          .map((e) => e.toRepr())
           .join(",");
     }
     return null;
