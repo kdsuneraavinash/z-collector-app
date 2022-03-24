@@ -65,29 +65,35 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: FirebaseUserStreamBuilder(
-        builder: (context, currentUserId) => SingleChildScrollView(
-          child: Column(
-            children: [
-              HomeProjectListSection(
-                title: "My Projects",
-                path: '/home/my-projects',
-                query: getMyProjects(currentUserId),
-              ),
-              const SizedBox(height: 8),
-              HomeProjectListSection(
-                title: "Private Projects",
-                path: '/home/private-projects',
-                query: getPrivateProjects(currentUserId),
-              ),
-              const SizedBox(height: 8),
-              HomeProjectListSection(
-                title: "Public Projects",
-                path: '/home/public-projects',
-                max: 3,
-                query: getPublicProjects(),
-              ),
-            ],
+      body: Container(
+        color: Colors.grey.shade100,
+        padding: const EdgeInsets.all(8),
+        height: MediaQuery.of(context).size.height,
+        child: FirebaseUserStreamBuilder(
+          builder: (context, currentUserId) => SingleChildScrollView(
+            child: Column(
+              children: [
+                HomeProjectListSection(
+                  title: "My Projects",
+                  path: '/home/my-projects',
+                  query: getMyProjects(currentUserId),
+                ),
+                const SizedBox(height: 16),
+                HomeProjectListSection(
+                  title: "Private Projects",
+                  path: '/home/private-projects',
+                  query: getPrivateProjects(currentUserId),
+                ),
+                const SizedBox(height: 16),
+                HomeProjectListSection(
+                  title: "Public Projects",
+                  path: '/home/public-projects',
+                  max: 3,
+                  query: getPublicProjects(),
+                ),
+                const SizedBox(height: 72),
+              ],
+            ),
           ),
         ),
       ),

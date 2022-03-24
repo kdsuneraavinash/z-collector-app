@@ -51,123 +51,127 @@ class _AddFieldState extends State<AddField> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Add New Field'),
-      content: SingleChildScrollView(
-        child: FormBuilder(
-          key: _formKey,
-          child: Column(
-            children: [
-              FormBuilderTextField(
-                name: 'name',
-                decoration: const InputDecoration(
-                  label: Text('Field Name'),
-                  border: OutlineInputBorder(),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: SingleChildScrollView(
+          child: FormBuilder(
+            key: _formKey,
+            child: Column(
+              children: [
+                FormBuilderTextField(
+                  name: 'name',
+                  decoration: const InputDecoration(
+                    label: Text('Field Name'),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: FormBuilderValidators.compose(
+                    [FormBuilderValidators.required(context)],
+                  ),
                 ),
-                validator: FormBuilderValidators.compose(
-                  [FormBuilderValidators.required(context)],
+                const SizedBox(height: 16),
+                FormBuilderDropdown<ProjectFieldType>(
+                  name: 'type',
+                  decoration: const InputDecoration(
+                    label: Text('Field Type'),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: FormBuilderValidators.compose(
+                    [FormBuilderValidators.required(context)],
+                  ),
+                  items: _buildTypeDropdownItems(),
+                  onChanged: (value) {
+                    setState(() {
+                      _hasOptions = value == ProjectFieldType.dropdown ||
+                          value == ProjectFieldType.radio ||
+                          value == ProjectFieldType.checkBoxes;
+                    });
+                    _formKey.currentState?.fields["validators"]
+                        ?.didChange(null);
+                  },
                 ),
-              ),
-              const SizedBox(height: 8),
-              FormBuilderDropdown<ProjectFieldType>(
-                name: 'type',
-                decoration: const InputDecoration(
-                  label: Text('Field Type'),
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                FormBuilderTextField(
+                  name: 'helperText',
+                  decoration: const InputDecoration(
+                    label: Text('Helper Text'),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: FormBuilderValidators.compose(
+                    [FormBuilderValidators.required(context)],
+                  ),
                 ),
-                validator: FormBuilderValidators.compose(
-                  [FormBuilderValidators.required(context)],
-                ),
-                items: _buildTypeDropdownItems(),
-                onChanged: (value) {
-                  setState(() {
-                    _hasOptions = value == ProjectFieldType.dropdown ||
-                        value == ProjectFieldType.radio ||
-                        value == ProjectFieldType.checkBoxes;
-                  });
-                  _formKey.currentState?.fields["validators"]?.didChange(null);
-                },
-              ),
-              const SizedBox(height: 8),
-              FormBuilderTextField(
-                name: 'helperText',
-                decoration: const InputDecoration(
-                  label: Text('Helper Text'),
-                  border: OutlineInputBorder(),
-                ),
-                validator: FormBuilderValidators.compose(
-                  [FormBuilderValidators.required(context)],
-                ),
-              ),
-              const SizedBox(height: 8),
-              _hasOptions
-                  ? Column(
-                      children: [
-                        FormBuilderField(
-                          name: 'options',
-                          validator: FormBuilderValidators.compose(
-                            [FormBuilderValidators.required(context)],
-                          ),
-                          builder: (FormFieldState<dynamic> field) {
-                            return InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: "Options",
-                                border: const OutlineInputBorder(),
-                                errorText: field.errorText,
-                              ),
-                              child: Column(
-                                children: [
-                                  FormBuilderTextField(
-                                    name: 'tempOption',
-                                    decoration: InputDecoration(
-                                      label: const Text('Option'),
-                                      border: const OutlineInputBorder(),
-                                      suffixIcon: IconButton(
-                                        onPressed: _addOption,
-                                        icon: const Icon(Icons.add),
+                const SizedBox(height: 16),
+                _hasOptions
+                    ? Column(
+                        children: [
+                          FormBuilderField(
+                            name: 'options',
+                            validator: FormBuilderValidators.compose(
+                              [FormBuilderValidators.required(context)],
+                            ),
+                            builder: (FormFieldState<dynamic> field) {
+                              return InputDecorator(
+                                decoration: InputDecoration(
+                                  labelText: "Options",
+                                  border: const OutlineInputBorder(),
+                                  errorText: field.errorText,
+                                ),
+                                child: Column(
+                                  children: [
+                                    FormBuilderTextField(
+                                      name: 'tempOption',
+                                      decoration: InputDecoration(
+                                        label: const Text('Option'),
+                                        border: const OutlineInputBorder(),
+                                        suffixIcon: IconButton(
+                                          onPressed: _addOption,
+                                          icon: const Icon(Icons.add),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  ..._getOptions(),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    )
-                  : const SizedBox(),
-              FormBuilderField(
-                name: 'validators',
-                builder:
-                    (FormFieldState<Map<ProjectFieldValidatorType, dynamic>>
-                        field) {
-                  return InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: "Validators",
-                      border: const OutlineInputBorder(),
-                      errorText: field.errorText,
-                    ),
-                    child: Column(
-                      children: [
-                        FormBuilderDropdown<ProjectFieldValidatorType>(
-                          name: 'tempValidator',
-                          decoration: InputDecoration(
-                            label: const Text('Validator'),
-                            border: const OutlineInputBorder(),
-                            suffixIcon: IconButton(
-                              onPressed: _addValidator,
-                              icon: const Icon(Icons.add),
-                            ),
+                                    ..._getOptions(),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
-                          items: _buildValidatorsDropdownItems(),
-                        ),
-                        ..._buildValidators(),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
+                          const SizedBox(height: 16),
+                        ],
+                      )
+                    : const SizedBox(),
+                FormBuilderField(
+                  name: 'validators',
+                  builder:
+                      (FormFieldState<Map<ProjectFieldValidatorType, dynamic>>
+                          field) {
+                    return InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: "Validators",
+                        border: const OutlineInputBorder(),
+                        errorText: field.errorText,
+                      ),
+                      child: Column(
+                        children: [
+                          FormBuilderDropdown<ProjectFieldValidatorType>(
+                            name: 'tempValidator',
+                            decoration: InputDecoration(
+                              label: const Text('Validator'),
+                              border: const OutlineInputBorder(),
+                              suffixIcon: IconButton(
+                                onPressed: _addValidator,
+                                icon: const Icon(Icons.add),
+                              ),
+                            ),
+                            items: _buildValidatorsDropdownItems(),
+                          ),
+                          ..._buildValidators(),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -292,10 +296,11 @@ class _AddFieldState extends State<AddField> {
                   const SizedBox(width: 16),
                   Expanded(child: Text('${i + 1}. $value')),
                   IconButton(
-                      onPressed: () {
-                        options.didChange(options.value..removeAt(i));
-                      },
-                      icon: const Icon(Icons.remove_circle)),
+                    onPressed: () =>
+                        options.didChange(options.value..removeAt(i)),
+                    icon: const Icon(Icons.remove_circle),
+                    color: Colors.red,
+                  ),
                 ],
               )))
           .values
@@ -359,10 +364,10 @@ class _AddFieldState extends State<AddField> {
                       : const SizedBox(),
                   const SizedBox(width: 8),
                   IconButton(
-                    onPressed: () {
-                      validators.didChange(validators.value..remove(key));
-                    },
+                    onPressed: () =>
+                        validators.didChange(validators.value..remove(key)),
                     icon: const Icon(Icons.remove_circle),
+                    color: Colors.red,
                   ),
                 ],
               ),
