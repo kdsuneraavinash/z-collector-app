@@ -319,7 +319,11 @@ class _StepThreeState extends State<_StepThree> {
                       border: OutlineInputBorder(),
                     ),
                     validator: FormBuilderValidators.compose(
-                      [FormBuilderValidators.required(context)],
+                      [
+                        FormBuilderValidators.required(context),
+                        FormBuilderValidators.maxLength(context, 5),
+                        FormBuilderValidators.minLength(context, 5),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8)
