@@ -46,6 +46,8 @@ class FormDataManager {
         return _extractMultipleNumeric(value);
       case ProjectFieldType.location:
         return _extractLocation(value);
+      case ProjectFieldType.locationSeries:
+        return _extractLocationSeries(value);
       case ProjectFieldType.radio:
       case ProjectFieldType.dropdown:
       case ProjectFieldType.numeric:
@@ -83,6 +85,15 @@ class FormDataManager {
 
   GeoPoint? _extractLocation(dynamic value) {
     if (value is Position) return GeoPoint(value.latitude, value.longitude);
+    return null;
+  }
+
+  String? _extractLocationSeries(dynamic value) {
+    if (value is List) {
+      return List<SeriesDataPoint<Position>>.from(value)
+          .map((e) => e.toRepr())
+          .join(",");
+    }
     return null;
   }
 
