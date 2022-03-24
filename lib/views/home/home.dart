@@ -15,6 +15,9 @@ class HomePage extends StatelessWidget {
         title: const Text("Z- Collector"),
       ),
       drawer: Drawer(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(bottomRight: Radius.circular(20)),
+        ),
         child: ListView(
           children: [
             DrawerHeader(
