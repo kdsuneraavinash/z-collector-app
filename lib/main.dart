@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:z_collector_app/views/helpers/dynamic_links.dart';
 import 'package:z_collector_app/views/home/home.dart';
 import 'package:z_collector_app/views/login.dart';
 import 'package:z_collector_app/views/projects/detail_project.dart';
@@ -31,61 +32,68 @@ class MyApp extends StatelessWidget {
     routerDelegate = BeamerDelegate(
       initialPath: loggedIn ? '/home' : '/login',
       locationBuilder: RoutesLocationBuilder(
-        routes: {
-          '/login': (context, state, data) => const LoginPage(),
-          '/register': (context, state, data) => const RegisterPage(),
-          '/home': (context, state, data) => const HomePage(),
-          '/home/add-project': (context, state, data) => const AddProjectPage(),
-          '/home/my-projects': (context, state, data) => const ListMyProjects(),
-          '/home/private-projects': (context, state, data) =>
-              const ListPrivateProjects(),
-          '/home/public-projects': (context, state, data) =>
-              const ListPublicProjects(),
-          '/home/project/:projectId': (context, state, data) {
-            final projectId = state.pathParameters['projectId']!;
-            return BeamPage(
-              key: ValueKey('details$projectId'),
-              title: projectId,
-              popToNamed: '/home',
-              child: DetailProjectPage(projectId: projectId),
-            );
+          routes: {
+            '/login': (context, state, data) => const LoginPage(),
+            '/register': (context, state, data) => const RegisterPage(),
+            '/home': (context, state, data) => const HomePage(),
+            '/home/add-project': (context, state, data) =>
+                const AddProjectPage(),
+            '/home/my-projects': (context, state, data) =>
+                const ListMyProjects(),
+            '/home/private-projects': (context, state, data) =>
+                const ListPrivateProjects(),
+            '/home/public-projects': (context, state, data) =>
+                const ListPublicProjects(),
+            '/home/project/:projectId': (context, state, data) {
+              final projectId = state.pathParameters['projectId']!;
+              return BeamPage(
+                key: ValueKey('details$projectId'),
+                title: projectId,
+                popToNamed: '/home',
+                child: DetailProjectPage(projectId: projectId),
+              );
+            },
+            '/home/project/:projectId/record/add': (context, state, data) {
+              final projectId = state.pathParameters['projectId']!;
+              return BeamPage(
+                key: ValueKey('recordAdd$projectId'),
+                title: projectId,
+                popToNamed: '/home/project/$projectId',
+                child: AddRecordPage(projectId: projectId),
+              );
+            },
+            '/home/project/:projectId/records': (context, state, data) {
+              final projectId = state.pathParameters['projectId']!;
+              return BeamPage(
+                key: ValueKey('recordList$projectId'),
+                title: projectId,
+                child: ListRecordPage(projectId: projectId),
+              );
+            },
+            '/home/project/:projectId/records/:recordId':
+                (context, state, data) {
+              final projectId = state.pathParameters['projectId']!;
+              final recordId = state.pathParameters['recordId']!;
+              return BeamPage(
+                key: ValueKey('recordDetails$recordId'),
+                title: recordId,
+                child:
+                    DetailRecordPage(projectId: projectId, recordId: recordId),
+              );
+            },
+            '/home/project/:projectId/blacklisted': (context, state, data) {
+              final projectId = state.pathParameters['projectId']!;
+              return BeamPage(
+                key: ValueKey('blacklistedUsersList$projectId'),
+                title: projectId,
+                child: BlacklistedUserListPage(projectId: projectId),
+              );
+            }
           },
-          '/home/project/:projectId/record/add': (context, state, data) {
-            final projectId = state.pathParameters['projectId']!;
-            return BeamPage(
-              key: ValueKey('recordAdd$projectId'),
-              title: projectId,
-              popToNamed: '/home/project/$projectId',
-              child: AddRecordPage(projectId: projectId),
-            );
-          },
-          '/home/project/:projectId/records': (context, state, data) {
-            final projectId = state.pathParameters['projectId']!;
-            return BeamPage(
-              key: ValueKey('recordList$projectId'),
-              title: projectId,
-              child: ListRecordPage(projectId: projectId),
-            );
-          },
-          '/home/project/:projectId/records/:recordId': (context, state, data) {
-            final projectId = state.pathParameters['projectId']!;
-            final recordId = state.pathParameters['recordId']!;
-            return BeamPage(
-              key: ValueKey('recordDetails$recordId'),
-              title: recordId,
-              child: DetailRecordPage(projectId: projectId, recordId: recordId),
-            );
-          },
-          '/home/project/:projectId/blacklisted': (context, state, data) {
-            final projectId = state.pathParameters['projectId']!;
-            return BeamPage(
-              key: ValueKey('blacklistedUsersList$projectId'),
-              title: projectId,
-              child: BlacklistedUserListPage(projectId: projectId),
-            );
-          }
-        },
-      ),
+          builder: (context, child) {
+            initDynamicLinks(context);
+            return child;
+          }),
     );
   }
 

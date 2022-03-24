@@ -9,13 +9,12 @@ Query<Map<String, dynamic>> getMyProjects(String currentUserId) {
 }
 
 Query<Map<String, dynamic>> getPrivateProjects(String currentUserId) {
-  // TODO: implement correct logic
   final userRef =
       FirebaseFirestore.instance.collection('users').doc(currentUserId);
   return FirebaseFirestore.instance
       .collection('projects')
-      .where('owner', isNotEqualTo: userRef)
-      .where('isPrivate', isEqualTo: true);
+      .where('isPrivate', isEqualTo: true)
+      .where('allowedUsers', arrayContains: userRef);
 }
 
 Query<Map<String, dynamic>> getPublicProjects() {

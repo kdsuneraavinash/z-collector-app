@@ -1,4 +1,5 @@
 import 'package:beamer/beamer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:z_collector_app/views/helpers/get_projects.dart';
@@ -12,6 +13,14 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Z- Collector"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+                Beamer.of(context).popToNamed("/login");
+              },
+              icon: const Icon(Icons.logout)),
+        ],
       ),
       body: FirebaseUserStreamBuilder(
         builder: (context, currentUserId) => SingleChildScrollView(

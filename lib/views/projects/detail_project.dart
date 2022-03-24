@@ -1,8 +1,10 @@
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
+import 'package:z_collector_app/views/helpers/dynamic_links.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:z_collector_app/views/helpers/is_allowed.dart';
 import 'package:z_collector_app/views/widgets/storage_image.dart';
@@ -26,17 +28,24 @@ class DetailProjectPage extends StatelessWidget {
           final userRef =
               FirebaseFirestore.instance.collection('users').doc(currentUserId);
           final recordAllowed = isAllowedToAddRecord(userRef, project);
+          final viewAllowed = isAllowedToView(userRef, project);
           return Scaffold(
             appBar: AppBar(title: const Text('Project Details')),
-            body: FirestoreStreamBuilder(
-              stream: project.owner.snapshots(),
-              builder: (context, userMap) => DetailProjectView(
-                projectId: projectId,
-                project: project,
-                owner: User.fromJson(userMap),
-                currentUserId: currentUserId,
-              ),
-            ),
+            body: viewAllowed
+                ? FirestoreStreamBuilder(
+                    stream: project.owner.snapshots(),
+                    builder: (context, userMap) => DetailProjectView(
+                      projectId: projectId,
+                      project: project,
+                      owner: User.fromJson(userMap),
+                      currentUserId: currentUserId,
+                    ),
+                  )
+                : PrivateProjectEntryPage(
+                    project: project,
+                    projectId: projectId,
+                    currentUserId: currentUserId,
+                  ),
             floatingActionButton: recordAllowed
                 ? FloatingActionButton.extended(
                     onPressed: () {
@@ -49,6 +58,66 @@ class DetailProjectPage extends StatelessWidget {
                 : null,
           );
         },
+      ),
+    );
+  }
+}
+
+class PrivateProjectEntryPage extends StatelessWidget {
+  final String projectId;
+  final Project project;
+  final String currentUserId;
+  PrivateProjectEntryPage(
+      {Key? key,
+      required this.project,
+      required this.projectId,
+      required this.currentUserId})
+      : super(key: key);
+
+  final textEdittingController = TextEditingController();
+
+  Future<void> _addPrivateProject() async {
+    if (textEdittingController.text == project.entryCode!) {
+      final userRef =
+          FirebaseFirestore.instance.collection('users').doc(currentUserId);
+      final projectRef =
+          FirebaseFirestore.instance.collection('projects').doc(projectId);
+      final userMap = (await userRef.get()).data();
+      final user = User.fromJson(userMap!);
+
+      user.allowedPrivateProjects.add(projectRef);
+      project.allowedUsers.add(userRef);
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .update(user.toJson());
+
+      await FirebaseFirestore.instance
+          .collection('projects')
+          .doc(projectId)
+          .update(project.toJson());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: TextField(
+              decoration: const InputDecoration(
+                label: Text("Entry Code"),
+              ),
+              controller: textEdittingController,
+            ),
+          ),
+          ElevatedButton(
+              onPressed: _addPrivateProject, child: const Text('Sumbit'))
+        ]),
       ),
     );
   }
@@ -71,7 +140,27 @@ class DetailProjectView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOwner = currentUserId == project.owner.id;
-    // TODO: Complete this screen.
+    void _showShareDialog() async {
+      final uri = await getPrivateProjectDynamicLink(projectId);
+
+      showDialog(
+        context: context,
+        builder: (buildContext) => AlertDialog(
+          title: const Text("Share Project"),
+          content: Text(uri.toString()),
+          actions: [
+            TextButton.icon(
+                onPressed: () =>
+                    Clipboard.setData(ClipboardData(text: uri.toString())),
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy')),
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'))
+          ],
+        ),
+      );
+    }
 
     return ListView(
       children: [
@@ -124,6 +213,15 @@ class DetailProjectView extends StatelessWidget {
                 Beamer.of(context)
                     .beamToNamed('/home/project/$projectId/records');
               },
+            ),
+          ),
+        if (isOwner)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: ElevatedButton.icon(
+              label: const Text("Share Project"),
+              icon: const Icon(Icons.share),
+              onPressed: _showShareDialog,
             ),
           ),
         if (isOwner)
