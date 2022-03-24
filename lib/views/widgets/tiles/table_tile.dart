@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:z_collector_app/models/project.dart';
 
 class RecordTableFieldTile extends StatelessWidget {
@@ -56,6 +57,6 @@ class RecordTableFieldTile extends StatelessWidget {
   String extractTime(DateTime? timestamp) {
     final timestampVal = timestamp;
     if (timestampVal == null) return "";
-    return "${timestampVal.hour}:${timestampVal.minute}:${timestampVal.second}";
+    return DateFormat('kk:mm:ss').format(timestampVal);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:z_collector_app/models/project.dart';
 
 class RecordTimestampFieldTile extends StatelessWidget {
@@ -20,9 +21,14 @@ class RecordTimestampFieldTile extends StatelessWidget {
       );
     }
 
-    // TODO: Hide date if time or time if date type
+    String timeStr = DateFormat('yyyy-MM-dd - kk:mm:ss').format(value.toDate());
+    if (field.type == ProjectFieldType.date) {
+      timeStr = DateFormat('yyyy-MM-dd').format(value.toDate());
+    } else if (field.type == ProjectFieldType.time) {
+      timeStr = DateFormat('kk:mm:ss').format(value.toDate());
+    }
     return ListTile(
-      title: Text(value.toDate().toString()),
+      title: Text(timeStr),
       subtitle: Text(field.name),
     );
   }
