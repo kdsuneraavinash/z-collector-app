@@ -1,8 +1,11 @@
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
+import 'package:z_collector_app/views/helpers/dynamic_links.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
 import 'package:z_collector_app/views/helpers/is_allowed.dart';
 import 'package:z_collector_app/views/widgets/storage_image.dart';
@@ -140,6 +143,28 @@ class DetailProjectView extends StatelessWidget {
     final isOwner = currentUserId == project.owner.id;
     // TODO: Complete this screen.
 
+    void _showShareDialog() async {
+      final uri = await getPrivateProjectDynamicLink(projectId);
+
+      showDialog(
+        context: context,
+        builder: (buildContext) => AlertDialog(
+          title: const Text("Share Project"),
+          content: Text(uri.toString()),
+          actions: [
+            TextButton.icon(
+                onPressed: () =>
+                    Clipboard.setData(ClipboardData(text: uri.toString())),
+                icon: const Icon(Icons.copy),
+                label: const Text('Copy')),
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'))
+          ],
+        ),
+      );
+    }
+
     return ListView(
       children: [
         Stack(
@@ -191,6 +216,15 @@ class DetailProjectView extends StatelessWidget {
                 Beamer.of(context)
                     .beamToNamed('/home/project/$projectId/records');
               },
+            ),
+          ),
+        if (isOwner)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: ElevatedButton.icon(
+              label: const Text("Share Project"),
+              icon: const Icon(Icons.share),
+              onPressed: _showShareDialog,
             ),
           ),
         if (isOwner)
