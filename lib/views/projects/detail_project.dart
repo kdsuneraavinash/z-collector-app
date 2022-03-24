@@ -189,7 +189,7 @@ class DetailProjectView extends StatelessWidget {
           ),
         const Divider(),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
           child: Text(project.description),
         ),
         if (isOwner)
@@ -210,6 +210,7 @@ class DetailProjectView extends StatelessWidget {
               label: const Text("Share Project"),
               icon: const Icon(Icons.share),
               onPressed: _showShareDialog,
+              style: ElevatedButton.styleFrom(primary: Colors.green),
             ),
           ),
         if (isOwner)
@@ -217,10 +218,9 @@ class DetailProjectView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ElevatedButton(
               child: const Text("Blacklist/Allow Users"),
-              onPressed: () {
-                Beamer.of(context)
-                    .beamToNamed('/home/project/$projectId/blacklisted');
-              },
+              onPressed: () => Beamer.of(context)
+                  .beamToNamed('/home/project/$projectId/blacklisted'),
+              style: ElevatedButton.styleFrom(primary: Colors.blueGrey),
             ),
           ),
         const SizedBox(height: 72),
