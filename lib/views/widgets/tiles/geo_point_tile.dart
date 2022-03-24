@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:z_collector_app/models/project.dart';
 
 class RecordGeoPointFieldTile extends StatelessWidget {
@@ -21,11 +22,15 @@ class RecordGeoPointFieldTile extends StatelessWidget {
     }
 
     return ListTile(
-        title: Text("${value.longitude}, ${value.latitude} (Tap to open)"),
-        subtitle: Text(field.name),
-        trailing: const Icon(Icons.open_in_browser),
-        onTap: () {
-          // TODO: Open in google maps
-        });
+      title: Text("${value.latitude}, ${value.longitude} (Tap to open)"),
+      subtitle: Text(field.name),
+      trailing: const Icon(Icons.open_in_browser),
+      onTap: () async {
+        final mapsUrl =
+            "https://www.google.com/maps/search/?api=1&query=${value.latitude},${value.longitude}";
+        final uri = Uri.encodeFull(mapsUrl);
+        await launch(uri);
+      },
+    );
   }
 }
