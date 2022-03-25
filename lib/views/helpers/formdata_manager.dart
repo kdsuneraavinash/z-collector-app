@@ -47,7 +47,9 @@ class FormDataManager {
       case ProjectFieldType.location:
         return _extractLocation(value);
       case ProjectFieldType.locationSeries:
-        return _extractLocationSeries(value);
+      case ProjectFieldType.motionSensorSeries:
+      case ProjectFieldType.ambientSensorSeries:
+        return _extractSensorDataSeries(value);
       case ProjectFieldType.radio:
       case ProjectFieldType.dropdown:
       case ProjectFieldType.numeric:
@@ -88,11 +90,9 @@ class FormDataManager {
     return null;
   }
 
-  String? _extractLocationSeries(dynamic value) {
+  String? _extractSensorDataSeries(dynamic value) {
     if (value is List) {
-      return List<SeriesDataPoint<Position>>.from(value)
-          .map((e) => e.toRepr())
-          .join(",");
+      return List<SeriesDataPoint>.from(value).map((e) => e.toRepr()).join(",");
     }
     return null;
   }

@@ -26,31 +26,37 @@ class RecordTableFieldTile extends StatelessWidget {
 
     final data = value.split(",").map((e) => e.split("|")).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(field.name,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.caption?.color,
-              )),
-        ),
-        DataTable(
-          columns: [
-            for (int i = 0; i < columnNames.length; i++)
-              DataColumn(label: Text(columnNames[i]))
-          ],
-          rows: [
-            for (int i = 0; i < data.length; i++)
-              DataRow(cells: [
-                DataCell(Text(extractTime(DateTime.tryParse(data[i][0])))),
-                DataCell(Text(data[i][1])),
-                DataCell(Text(data[i][2]))
-              ])
-          ],
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(field.name,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.caption?.color,
+                )),
+          ),
+          DataTable(
+            columns: [
+              for (int i = 0; i < columnNames.length; i++)
+                DataColumn(label: Text(columnNames[i]))
+            ],
+            rows: [
+              for (int i = 0; i < data.length; i++)
+                DataRow(cells: [
+                  DataCell(Text(extractTime(DateTime.tryParse(data[i][0])))),
+                  for (int j = 1; j < columnNames.length; j++)
+                    if (data[i].length < j + 1)
+                      const DataCell(Text(""))
+                    else
+                      DataCell(Text(data[i][j]))
+                ])
+            ],
+          ),
+        ],
+      ),
     );
   }
 
