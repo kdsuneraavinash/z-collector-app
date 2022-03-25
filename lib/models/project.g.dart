@@ -69,6 +69,8 @@ const _$ProjectFieldTypeEnumMap = {
   ProjectFieldType.numeric: 'NUMERIC',
   ProjectFieldType.location: 'LOCATION',
   ProjectFieldType.locationSeries: 'LOCATION_SERIES',
+  ProjectFieldType.motionSensorSeries: 'MOTION_SENSOR_SERIES',
+  ProjectFieldType.ambientSensorSeries: 'AMBIENT_SENSOR_SERIES',
   ProjectFieldType.image: 'IMAGE',
   ProjectFieldType.video: 'VIDEO',
   ProjectFieldType.audio: 'AUDIO',

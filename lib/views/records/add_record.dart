@@ -6,9 +6,9 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
-import 'package:z_collector_app/views/helpers/formdata_manager.dart';
 import 'package:z_collector_app/providers/progress_provider.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
+import 'package:z_collector_app/views/helpers/formdata_manager.dart';
 import 'package:z_collector_app/views/helpers/is_allowed.dart';
 import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
 import 'package:z_collector_app/views/widgets/fields/record_field.dart';
@@ -23,13 +23,15 @@ class AddRecordPage extends StatelessWidget {
     final projectRef =
         FirebaseFirestore.instance.collection('projects').doc(projectId);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("Add New Record")),
-      body: FirestoreFutureBuilder(
-        future: projectRef.get(),
-        builder: (context, projectData) => AddRecordPageForm(
-          projectId: projectId,
-          project: Project.fromJson(projectData),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text("Add New Record")),
+        body: FirestoreFutureBuilder(
+          future: projectRef.get(),
+          builder: (context, projectData) => AddRecordPageForm(
+            projectId: projectId,
+            project: Project.fromJson(projectData),
+          ),
         ),
       ),
     );

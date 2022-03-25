@@ -8,6 +8,8 @@ Map<ProjectFieldType, String> _fieldTypes = {
   ProjectFieldType.numeric: 'Number',
   ProjectFieldType.location: 'Location',
   ProjectFieldType.locationSeries: 'Location Series',
+  ProjectFieldType.motionSensorSeries: 'Motion Sensor Series',
+  ProjectFieldType.ambientSensorSeries: 'Ambient Sensor Series',
   ProjectFieldType.image: 'Image',
   ProjectFieldType.video: 'Video',
   ProjectFieldType.audio: 'Audio',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/views/widgets/fields/abstract_field.dart';
+import 'package:z_collector_app/views/widgets/fields/ambient_sensor_series_field.dart';
 import 'package:z_collector_app/views/widgets/fields/audio_field.dart';
 import 'package:z_collector_app/views/widgets/fields/boolean_field.dart';
 import 'package:z_collector_app/views/widgets/fields/checkboxes_field.dart';
@@ -10,6 +11,7 @@ import 'package:z_collector_app/views/widgets/fields/dropdown_field.dart';
 import 'package:z_collector_app/views/widgets/fields/image_field.dart';
 import 'package:z_collector_app/views/widgets/fields/location_field.dart';
 import 'package:z_collector_app/views/widgets/fields/location_series_field.dart';
+import 'package:z_collector_app/views/widgets/fields/motion_sensor_series_field.dart';
 import 'package:z_collector_app/views/widgets/fields/numeric_field.dart';
 import 'package:z_collector_app/views/widgets/fields/radio_field.dart';
 import 'package:z_collector_app/views/widgets/fields/string_field.dart';
@@ -33,6 +35,10 @@ class RecordFieldWidget extends AbstractFieldWidget {
         return LocationFieldWidget(index: index, field: field);
       case ProjectFieldType.locationSeries:
         return LocationSeriesFieldWidget(index: index, field: field);
+      case ProjectFieldType.motionSensorSeries:
+        return MotionSensorSeriesFieldWidget(index: index, field: field);
+      case ProjectFieldType.ambientSensorSeries:
+        return AmbientSensorSeriesFieldWidget(index: index, field: field);
       case ProjectFieldType.image:
         return ImageFieldWidget(index: index, field: field);
       case ProjectFieldType.video:

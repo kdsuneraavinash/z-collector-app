@@ -1,6 +1,7 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:z_collector_app/models/project.dart';
+import 'package:z_collector_app/views/helpers/color_gen.dart';
 
 class ProjectListCard extends StatelessWidget {
   final String projectId;
@@ -44,7 +45,7 @@ class ProjectListCard extends StatelessWidget {
                 ),
               ),
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: generateColor(project.name),
                 borderRadius: BorderRadius.circular(5),
               ),
             ),

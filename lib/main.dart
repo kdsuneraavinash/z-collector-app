@@ -1,20 +1,21 @@
 import 'package:beamer/beamer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:z_collector_app/views/helpers/dynamic_links.dart';
 import 'package:z_collector_app/views/home/home.dart';
 import 'package:z_collector_app/views/login.dart';
-import 'package:z_collector_app/views/projects/detail_project.dart';
 import 'package:z_collector_app/views/projects/add_project.dart';
+import 'package:z_collector_app/views/projects/detail_project.dart';
 import 'package:z_collector_app/views/projects/list_blacklisted.dart';
-import 'package:z_collector_app/views/records/detail_record.dart';
-import 'package:z_collector_app/views/records/list_record.dart';
 import 'package:z_collector_app/views/projects/lists.dart';
 import 'package:z_collector_app/views/records/add_record.dart';
+import 'package:z_collector_app/views/records/detail_record.dart';
+import 'package:z_collector_app/views/records/list_record.dart';
 import 'package:z_collector_app/views/register.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -111,7 +112,7 @@ class MyApp extends StatelessWidget {
             seedColor: Colors.blue,
             secondary: Colors.red,
           ),
-          useMaterial3: true,
+          useMaterial3: false,
         ),
         routeInformationParser: BeamerParser(),
         routerDelegate: routerDelegate,

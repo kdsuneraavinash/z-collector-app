@@ -87,6 +87,10 @@ enum ProjectFieldType {
   location,
   @JsonValue('LOCATION_SERIES')
   locationSeries,
+  @JsonValue('MOTION_SENSOR_SERIES')
+  motionSensorSeries,
+  @JsonValue('AMBIENT_SENSOR_SERIES')
+  ambientSensorSeries,
   @JsonValue('IMAGE')
   image,
   @JsonValue('VIDEO')
@@ -132,31 +136,94 @@ enum ProjectFieldValidatorType {
   url,
 }
 
+// --------------------- Series Data Models ------------------------------------
+
 class SeriesDataPoint<T> {
   final DateTime timestamp;
   final T dataPoint;
 
   SeriesDataPoint._(this.timestamp, this.dataPoint);
 
+  factory SeriesDataPoint(T dataPoint) {
+    return SeriesDataPoint._(DateTime.now(), dataPoint);
+  }
+
   String toRepr() {
     final dataPoint = this.dataPoint;
     if (dataPoint is Position) {
       return "${timestamp.toIso8601String()}|${dataPoint.longitude}|${dataPoint.latitude}";
     }
+    if (dataPoint is MotionSensorData) {
+      return "${timestamp.toIso8601String()}|${dataPoint.toRepr()}";
+    }
+    if (dataPoint is AmbientSensorData) {
+      return "${timestamp.toIso8601String()}|${dataPoint.toRepr()}";
+    }
     throw UnimplementedError();
   }
+}
 
-  factory SeriesDataPoint(T dataPoint) {
-    return SeriesDataPoint._(DateTime.now(), dataPoint);
+class MotionSensorData {
+  final List<double> accelerometer;
+  final List<double> linearAcceleration;
+  final List<double> magneticField;
+  final List<double> gravity;
+  final List<double> gyroscope;
+  final List<double> rotationVector;
+
+  MotionSensorData({
+    required this.accelerometer,
+    required this.linearAcceleration,
+    required this.magneticField,
+    required this.gravity,
+    required this.gyroscope,
+    required this.rotationVector,
+  });
+
+  factory MotionSensorData.fromMap(Map<String, List<Object?>> map) {
+    return MotionSensorData(
+      accelerometer: List<double>.from(map['accelerometer']!),
+      linearAcceleration: List<double>.from(map['linearAcceleration']!),
+      magneticField: List<double>.from(map['magneticField']!),
+      gravity: List<double>.from(map['gravity']!),
+      gyroscope: List<double>.from(map['gyroscope']!),
+      rotationVector: List<double>.from(map['rotationVector']!),
+    );
   }
 
-  static SeriesDataPoint<Position> positionFromRepr(String repr) {
-    final values = repr.split("|");
-    final timestamp =
-        DateTime.tryParse(values[0]) ?? DateTime.fromMicrosecondsSinceEpoch(0);
-    final longitude = double.tryParse(values[1]) ?? 0;
-    final latitude = double.tryParse(values[2]) ?? 0;
-    return SeriesDataPoint._(timestamp,
-        Position.fromMap({"longitude": longitude, "latitude": latitude}));
+  String toRepr() {
+    return "${accelerometer.join('|')}|${linearAcceleration.join('|')}"
+        "|${magneticField.join('|')}|${gravity.join('|')}"
+        "|${gyroscope.join('|')}|${rotationVector.join('|')}";
+  }
+}
+
+class AmbientSensorData {
+  final double ambientTemperature;
+  final double light;
+  final double pressure;
+  final double proximity;
+  final double relativeHumidity;
+
+  AmbientSensorData({
+    required this.ambientTemperature,
+    required this.light,
+    required this.pressure,
+    required this.proximity,
+    required this.relativeHumidity,
+  });
+
+  factory AmbientSensorData.fromMap(Map<String, Object?> map) {
+    return AmbientSensorData(
+      ambientTemperature: map['ambientTemperature'] as double,
+      light: map['light'] as double,
+      pressure: map['pressure'] as double,
+      proximity: map['proximity'] as double,
+      relativeHumidity: map['relativeHumidity'] as double,
+    );
+  }
+
+  String toRepr() {
+    return "$ambientTemperature|$light|$pressure|$proximity|$relativeHumidity";
   }
 }
