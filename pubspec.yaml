@@ -51,6 +51,9 @@ dependencies:
   csv: ^5.0.1
   firebase_dynamic_links: ^4.1.1
   intl: ^0.17.0
+  flutter_share: ^2.0.0
+  otp_text_field: ^1.1.2
+  url_launcher: ^6.0.20
 
 dev_dependencies:
   flutter_test:

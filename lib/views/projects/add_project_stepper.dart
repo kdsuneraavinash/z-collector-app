@@ -116,51 +116,57 @@ class _AddProjectStepperState extends State<AddProjectStepper> {
 
   Widget _buidControls(_, controls) => Column(
         children: [
-          (controls.currentStep == 2)
-              ? Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => _onSubmit(true),
-                            child: const Text('Save as Draft'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => _onSubmit(false),
-                            child: const Text('Publish'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                )
-              : Row(
+          const SizedBox(height: 16),
+          if (controls.currentStep == 2)
+            Column(
+              children: [
+                Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: controls.onStepContinue,
-                        child: const Text('Next'),
+                        onPressed: () => _onSubmit(true),
+                        child: const Text('Save as Draft'),
                       ),
                     ),
                   ],
                 ),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: controls.onStepCancel,
-                  child: const Text('Back'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _onSubmit(false),
+                        child: const Text('Publish'),
+                        style: ElevatedButton.styleFrom(
+                          primary: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          if (controls.currentStep != 2)
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: controls.onStepContinue,
+                    child: const Text('Next'),
+                  ),
+                ),
+              ],
+            ),
+          if (controls.currentStep != 0)
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: controls.onStepCancel,
+                    child: const Text('Back'),
+                  ),
+                ),
+              ],
+            ),
         ],
       );
 }
@@ -208,7 +214,6 @@ class _StepOne extends StatelessWidget {
             ),
             maxImages: 1,
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
@@ -266,10 +271,15 @@ class _StepTwoState extends State<_StepTwo> {
                     index: i,
                     field: widget.fields[i],
                   )),
-                  IconButton(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: IconButton(
                       onPressed: () =>
                           setState(() => widget.fields.removeAt(i)),
-                      icon: const Icon(Icons.remove_circle)),
+                      icon: const Icon(Icons.remove_circle),
+                      color: Colors.red,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -319,7 +329,11 @@ class _StepThreeState extends State<_StepThree> {
                       border: OutlineInputBorder(),
                     ),
                     validator: FormBuilderValidators.compose(
-                      [FormBuilderValidators.required(context)],
+                      [
+                        FormBuilderValidators.required(context),
+                        FormBuilderValidators.maxLength(context, 5),
+                        FormBuilderValidators.minLength(context, 5),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8)

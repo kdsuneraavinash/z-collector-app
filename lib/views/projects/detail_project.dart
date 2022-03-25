@@ -1,7 +1,9 @@
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_share/flutter_share.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/dynamic_links.dart';
@@ -67,17 +69,15 @@ class PrivateProjectEntryPage extends StatelessWidget {
   final String projectId;
   final Project project;
   final String currentUserId;
-  PrivateProjectEntryPage(
+  const PrivateProjectEntryPage(
       {Key? key,
       required this.project,
       required this.projectId,
       required this.currentUserId})
       : super(key: key);
 
-  final textEdittingController = TextEditingController();
-
-  Future<void> _addPrivateProject() async {
-    if (textEdittingController.text == project.entryCode!) {
+  Future<void> _addPrivateProject(String text) async {
+    if (text == project.entryCode!) {
       final userRef =
           FirebaseFirestore.instance.collection('users').doc(currentUserId);
       final projectRef =
@@ -107,16 +107,19 @@ class PrivateProjectEntryPage extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: TextField(
-              decoration: const InputDecoration(
-                label: Text("Entry Code"),
-              ),
-              controller: textEdittingController,
+            padding: const EdgeInsets.only(bottom: 32.0),
+            child: OTPTextField(
+              length: 5,
+              width: MediaQuery.of(context).size.width * .8,
+              fieldWidth: 50,
+              style: const TextStyle(fontSize: 17),
+              textFieldAlignment: MainAxisAlignment.spaceAround,
+              fieldStyle: FieldStyle.box,
+              onCompleted: _addPrivateProject,
+              onChanged: (String _) {},
             ),
           ),
-          ElevatedButton(
-              onPressed: _addPrivateProject, child: const Text('Sumbit'))
+          const Text('Enter Entry Code')
         ]),
       ),
     );
@@ -140,26 +143,11 @@ class DetailProjectView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOwner = currentUserId == project.owner.id;
+
     void _showShareDialog() async {
       final uri = await getPrivateProjectDynamicLink(projectId);
-
-      showDialog(
-        context: context,
-        builder: (buildContext) => AlertDialog(
-          title: const Text("Share Project"),
-          content: Text(uri.toString()),
-          actions: [
-            TextButton.icon(
-                onPressed: () =>
-                    Clipboard.setData(ClipboardData(text: uri.toString())),
-                icon: const Icon(Icons.copy),
-                label: const Text('Copy')),
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'))
-          ],
-        ),
-      );
+      await FlutterShare.share(
+          title: "Project Invite", linkUrl: uri.toString());
     }
 
     return ListView(
@@ -201,7 +189,7 @@ class DetailProjectView extends StatelessWidget {
           ),
         const Divider(),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
           child: Text(project.description),
         ),
         if (isOwner)
@@ -222,6 +210,7 @@ class DetailProjectView extends StatelessWidget {
               label: const Text("Share Project"),
               icon: const Icon(Icons.share),
               onPressed: _showShareDialog,
+              style: ElevatedButton.styleFrom(primary: Colors.green),
             ),
           ),
         if (isOwner)
@@ -229,10 +218,9 @@ class DetailProjectView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ElevatedButton(
               child: const Text("Blacklist/Allow Users"),
-              onPressed: () {
-                Beamer.of(context)
-                    .beamToNamed('/home/project/$projectId/blacklisted');
-              },
+              onPressed: () => Beamer.of(context)
+                  .beamToNamed('/home/project/$projectId/blacklisted'),
+              style: ElevatedButton.styleFrom(primary: Colors.blueGrey),
             ),
           ),
         const SizedBox(height: 72),

@@ -13,38 +13,87 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Z- Collector"),
-        actions: [
-          IconButton(
-              onPressed: () {
+      ),
+      drawer: Drawer(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(bottomRight: Radius.circular(20)),
+        ),
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Center(
+                child: Text(
+                  "Z-Collector",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline4!
+                      .apply(fontWeightDelta: 2, color: Colors.white),
+                ),
+              ),
+              decoration:
+                  BoxDecoration(color: Theme.of(context).colorScheme.primary),
+            ),
+            ListTile(
+              title: const Text("My Projects"),
+              onTap: () => Beamer.of(context).beamToNamed('/home/my-projects'),
+            ),
+            ListTile(
+              title: const Text("Private Projects"),
+              onTap: () =>
+                  Beamer.of(context).beamToNamed('/home/private-projects'),
+            ),
+            ListTile(
+              title: const Text("Public Projects"),
+              onTap: () =>
+                  Beamer.of(context).beamToNamed('/home/public-projects'),
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text("Create Project"),
+              trailing: const Icon(Icons.add),
+              onTap: () => Beamer.of(context).beamToNamed('/home/add-project'),
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text("Logout"),
+              trailing: const Icon(Icons.logout),
+              onTap: () {
                 FirebaseAuth.instance.signOut();
                 Beamer.of(context).popToNamed("/login");
               },
-              icon: const Icon(Icons.logout)),
-        ],
+            ),
+          ],
+        ),
       ),
-      body: FirebaseUserStreamBuilder(
-        builder: (context, currentUserId) => SingleChildScrollView(
-          child: Column(
-            children: [
-              HomeProjectListSection(
-                title: "My Projects",
-                path: '/home/my-projects',
-                query: getMyProjects(currentUserId),
-              ),
-              const SizedBox(height: 8),
-              HomeProjectListSection(
-                title: "Private Projects",
-                path: '/home/private-projects',
-                query: getPrivateProjects(currentUserId),
-              ),
-              const SizedBox(height: 8),
-              HomeProjectListSection(
-                title: "Public Projects",
-                path: '/home/public-projects',
-                max: 3,
-                query: getPublicProjects(),
-              ),
-            ],
+      body: Container(
+        color: Colors.grey.shade100,
+        padding: const EdgeInsets.all(8),
+        height: MediaQuery.of(context).size.height,
+        child: FirebaseUserStreamBuilder(
+          builder: (context, currentUserId) => SingleChildScrollView(
+            child: Column(
+              children: [
+                HomeProjectListSection(
+                  title: "My Projects",
+                  path: '/home/my-projects',
+                  query: getMyProjects(currentUserId),
+                ),
+                const SizedBox(height: 16),
+                HomeProjectListSection(
+                  title: "Private Projects",
+                  path: '/home/private-projects',
+                  query: getPrivateProjects(currentUserId),
+                ),
+                const SizedBox(height: 16),
+                HomeProjectListSection(
+                  title: "Public Projects",
+                  path: '/home/public-projects',
+                  max: 3,
+                  query: getPublicProjects(),
+                ),
+                const SizedBox(height: 72),
+              ],
+            ),
           ),
         ),
       ),
