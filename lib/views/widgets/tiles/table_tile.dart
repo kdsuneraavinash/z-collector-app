@@ -26,36 +26,80 @@ class RecordTableFieldTile extends StatelessWidget {
 
     final data = value.split(",").map((e) => e.split("|")).toList();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(field.name,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.caption?.color,
-                )),
+    return ListTile(
+      title: Text(field.name),
+      subtitle: const Text("Press to view"),
+      trailing: const Icon(Icons.arrow_forward_ios),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecordSeriesDataTable(
+              field: field,
+              columnNames: columnNames,
+              data: data,
+            ),
           ),
-          DataTable(
-            columns: [
-              for (int i = 0; i < columnNames.length; i++)
-                DataColumn(label: Text(columnNames[i]))
-            ],
-            rows: [
-              for (int i = 0; i < data.length; i++)
-                DataRow(cells: [
-                  DataCell(Text(extractTime(DateTime.tryParse(data[i][0])))),
-                  for (int j = 1; j < columnNames.length; j++)
-                    if (data[i].length < j + 1)
-                      const DataCell(Text(""))
-                    else
-                      DataCell(Text(data[i][j]))
-                ])
-            ],
-          ),
-        ],
+        );
+      },
+    );
+  }
+}
+
+class RecordSeriesDataTable extends StatelessWidget {
+  final ProjectField field;
+  final List<String> columnNames;
+  final List<List<String>> data;
+
+  const RecordSeriesDataTable(
+      {Key? key,
+      required this.field,
+      required this.columnNames,
+      required this.data})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(field.name),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: [
+                    for (int i = 0; i < columnNames.length; i++)
+                      DataColumn(label: Text(columnNames[i]))
+                  ],
+                  rows: [
+                    for (int i = 0; i < data.length; i++)
+                      DataRow(cells: [
+                        DataCell(
+                            Text(extractTime(DateTime.tryParse(data[i][0])))),
+                        for (int j = 1; j < columnNames.length; j++)
+                          if (data[i].length < j + 1)
+                            const DataCell(Text("N/A"))
+                          else
+                            DataCell(Text(data[i][j]))
+                      ])
+                  ],
+                ),
+              ),
+            ),
+            ButtonBar(
+              children: [
+                ElevatedButton(
+                  child: const Text("Close"),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
