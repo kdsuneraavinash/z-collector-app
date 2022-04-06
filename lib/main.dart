@@ -15,6 +15,7 @@ import 'package:z_collector_app/views/projects/lists.dart';
 import 'package:z_collector_app/views/records/add_record.dart';
 import 'package:z_collector_app/views/records/detail_record.dart';
 import 'package:z_collector_app/views/records/list_record.dart';
+import 'package:z_collector_app/views/records/list_upload_tasks.dart';
 import 'package:z_collector_app/views/register.dart';
 
 import 'firebase_options.dart';
@@ -91,7 +92,9 @@ class MyApp extends StatelessWidget {
                 title: projectId,
                 child: BlacklistedUserListPage(projectId: projectId),
               );
-            }
+            },
+            '/home/record-assets': (context, state, data) =>
+                const UploadTaskList(),
           },
           builder: (context, child) {
             initDynamicLinks(context);
