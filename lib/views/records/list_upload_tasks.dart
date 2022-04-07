@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:z_collector_app/views/helpers/background_upload.dart';
 
 class UploadTaskList extends StatelessWidget {
@@ -10,7 +11,8 @@ class UploadTaskList extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(title: const Text("Record Assets")),
         body: FutureBuilder<List<UploadJob>>(
-          future: BackgroundUpload.instance.getAllTasks(),
+          future: SharedPreferences.getInstance()
+              .then((prefs) => BackgroundUpload.getAllTasks(prefs)),
           builder: (context, snapshot) {
             if (snapshot.hasData && (snapshot.data?.isNotEmpty ?? false)) {
               final data = snapshot.data!;

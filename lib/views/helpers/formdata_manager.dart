@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -121,7 +119,7 @@ class FormDataManager {
 
   void startUploading() async {
     for (final fileUpload in fileUploads) {
-      BackgroundUpload.instance.dispatchBackgoundUploadTask(fileUpload);
+      BackgroundUpload.dispatchBackgroundUploadTask(fileUpload);
     }
   }
 }

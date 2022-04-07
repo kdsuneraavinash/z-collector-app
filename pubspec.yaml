@@ -56,6 +56,7 @@ dependencies:
   workmanager: ^0.4.1
   shared_preferences: ^2.0.13
   uuid: ^3.0.6
+  shared_preferences_android: ^2.0.11
 
 dev_dependencies:
   flutter_test:

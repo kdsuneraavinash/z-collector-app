@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_android/shared_preferences_android.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:z_collector_app/firebase_options.dart';
 
 class UploadJob {
   final String id;
@@ -37,9 +40,9 @@ class UploadJob {
     return json.encode(toJson());
   }
 
-  static Future<List<UploadJob>> getAll() async {
-    final prefs = await SharedPreferences.getInstance();
+  static List<UploadJob> getAll(SharedPreferences prefs) {
     final String? tasks = prefs.getString('tasks');
+    print('tasks: $tasks');
     if (tasks == null) {
       return [];
     }
@@ -48,9 +51,8 @@ class UploadJob {
         .toList();
   }
 
-  Future<bool> save() async {
-    final prefs = await SharedPreferences.getInstance();
-    final tasks = await getAll();
+  Future<bool> save(SharedPreferences prefs) async {
+    final tasks = getAll(prefs);
     final i = tasks.indexOf(this);
     if (i == -1) {
       tasks.add(this);
@@ -70,46 +72,23 @@ class UploadJob {
 }
 
 class BackgroundUpload {
-  static const BackgroundUpload instance = BackgroundUpload._();
   static const ttSingleTask = "TT_SINGLE_TASK";
   static const ttStartupTask = "TT_STARTUP_TASK";
   static const ttTestTask = "TT_TEST_TASK";
-  final retryCount = 3;
+  static const retryCount = 3;
 
   const BackgroundUpload._();
 
-  void initialize() {
+  static void initialize() {
     Workmanager().initialize(
       callbackDispatcher,
       isInDebugMode: true,
     );
-    _dispatchStatupTask();
+    _dispatchStartupTask();
     _dispatchTestTask();
   }
 
-  void callbackDispatcher() {
-    Workmanager().executeTask(
-      (task, inputData) {
-        print(
-            "Native called background task: $task"); //simpleTask will be emitted here.
-        switch (task) {
-          case ttSingleTask:
-            return _handleSingleTask(inputData!);
-          case ttStartupTask:
-            return _handleStartupTask(inputData);
-          case ttTestTask:
-            return _handleTestTask(inputData);
-        }
-        return Future.value(true);
-      },
-    );
-  }
-
-  Future<List<UploadJob>> getAllTasks() async {
-    return UploadJob.getAll();
-  }
-
-  void dispatchBackgoundUploadTask(UploadJob task) {
+  static void dispatchBackgroundUploadTask(UploadJob task) {
     Workmanager().registerOneOffTask(
       "1",
       ttSingleTask,
@@ -117,55 +96,96 @@ class BackgroundUpload {
     );
   }
 
-  void _dispatchStatupTask() {
+  static void _dispatchStartupTask() {
     Workmanager().registerOneOffTask("2", ttStartupTask, inputData: {});
   }
 
-  void _dispatchTestTask() {
+  static void _dispatchTestTask() {
     Workmanager().registerOneOffTask("3", ttTestTask, inputData: {});
   }
 
-  Future<bool> _handleStartupTask(Map<String, dynamic>? data) async {
-    final tasks = await getAllTasks();
+  static List<UploadJob> getAllTasks(SharedPreferences prefs) {
+    return UploadJob.getAll(prefs);
+  }
+
+  static Future<bool> handleStartupTask(SharedPreferences prefs,
+      FirebaseStorage storage, Map<String, dynamic>? data) async {
+    final tasks = getAllTasks(prefs);
     for (var task in tasks) {
       if (!task.isUploaded) {
-        _uploadTask(task);
+        await _uploadTask(prefs, storage, task);
       }
     }
+    print("Startup task finished");
     return true;
   }
 
-  Future<bool> _handleSingleTask(Map<String, dynamic> data) async {
+  static Future<bool> handleSingleTask(SharedPreferences prefs,
+      FirebaseStorage storage, Map<String, dynamic> data) async {
     final task = UploadJob.fromJson(data);
-    task.save();
-    _uploadTask(task);
+    await task.save(prefs);
+    await _uploadTask(prefs, storage, task);
     return true;
   }
 
-  Future<bool> _handleTestTask(Map<String, dynamic>? data) async {
+  static Future<bool> handleTestTask(Map<String, dynamic>? data) async {
     print("=============Test task==============");
     return true;
   }
 
-  void _uploadTask(UploadJob task) async {
+  static Future<void> _uploadTask(
+      SharedPreferences prefs, FirebaseStorage storage, UploadJob task) async {
     for (var i = 0; i < retryCount; i++) {
-      final uploadDone = await _upload(task);
+      final uploadDone = await _upload(storage, task);
       if (uploadDone) {
         task.isUploaded = true;
-        task.save();
+        await task.save(prefs);
         break;
       }
     }
   }
 
-  Future<bool> _upload(UploadJob task) async {
+  static Future<bool> _upload(FirebaseStorage storage, UploadJob task) async {
     try {
-      await FirebaseStorage.instance
-          .ref(task.storagePath)
-          .putFile(File(task.filePath));
+      print("Uploading ${task.filePath} to ${task.storagePath}");
+      print("Name ${storage.app.options}");
+      print("Ref ${storage.ref(task.storagePath)}");
+      await storage.ref(task.storagePath).putFile(File(task.filePath));
+      print("Uploaded");
       return true;
     } catch (e) {
+      print(e);
       return false;
     }
   }
+}
+
+void callbackDispatcher() {
+  Workmanager().executeTask(
+    (task, inputData) async {
+      //simpleTask will be emitted here.
+      try {
+        print("Native called background task: $task");
+        await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform);
+        final storage = FirebaseStorage.instance;
+        if (Platform.isAndroid) SharedPreferencesAndroid.registerWith();
+        final prefs = await SharedPreferences.getInstance();
+        print("Got shared prefs: ${prefs.getKeys()}");
+        switch (task) {
+          case BackgroundUpload.ttSingleTask:
+            return BackgroundUpload.handleSingleTask(
+                prefs, storage, inputData!);
+          case BackgroundUpload.ttStartupTask:
+            return BackgroundUpload.handleStartupTask(
+                prefs, storage, inputData);
+          case BackgroundUpload.ttTestTask:
+            return BackgroundUpload.handleTestTask(inputData);
+        }
+      } catch (e) {
+        print(e);
+      }
+      return Future.value(true);
+    },
+  );
 }
