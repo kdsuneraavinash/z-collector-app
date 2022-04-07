@@ -70,31 +70,34 @@ class UploadJob {
 }
 
 class BackgroundUpload {
-  static const TT_SINGLE_TASK = "TT_SINGLE_TASK";
-  static const TT_STARTUP_TASKS = "TT_STARTUP_TASKS";
-  static const TT_TEST_TASK = "TT_TEST_TASK";
-  static const RETRY_COUNT = 3;
+  static const BackgroundUpload instance = BackgroundUpload._();
+  static const ttSingleTask = "TT_SINGLE_TASK";
+  static const ttStartupTask = "TT_STARTUP_TASK";
+  static const ttTestTask = "TT_TEST_TASK";
+  final retryCount = 3;
 
-  static void initialize() {
+  const BackgroundUpload._();
+
+  void initialize() {
     Workmanager().initialize(
       callbackDispatcher,
       isInDebugMode: true,
     );
-    _dispatchStatupTasks();
+    _dispatchStatupTask();
     _dispatchTestTask();
   }
 
-  static void callbackDispatcher() {
+  void callbackDispatcher() {
     Workmanager().executeTask(
       (task, inputData) {
         print(
             "Native called background task: $task"); //simpleTask will be emitted here.
         switch (task) {
-          case TT_SINGLE_TASK:
+          case ttSingleTask:
             return _handleSingleTask(inputData!);
-          case TT_STARTUP_TASKS:
-            return _handleStartupTasks(inputData);
-          case TT_TEST_TASK:
+          case ttStartupTask:
+            return _handleStartupTask(inputData);
+          case ttTestTask:
             return _handleTestTask(inputData);
         }
         return Future.value(true);
@@ -102,27 +105,27 @@ class BackgroundUpload {
     );
   }
 
-  static Future<List<UploadJob>> getAllTasks() async {
+  Future<List<UploadJob>> getAllTasks() async {
     return UploadJob.getAll();
   }
 
-  static void dispatchBackgoundUploadTask(UploadJob task) {
+  void dispatchBackgoundUploadTask(UploadJob task) {
     Workmanager().registerOneOffTask(
       "1",
-      TT_SINGLE_TASK,
+      ttSingleTask,
       inputData: task.toJson(),
     );
   }
 
-  static void _dispatchStatupTasks() {
-    Workmanager().registerOneOffTask("2", TT_STARTUP_TASKS, inputData: {});
+  void _dispatchStatupTask() {
+    Workmanager().registerOneOffTask("2", ttStartupTask, inputData: {});
   }
 
-  static void _dispatchTestTask() {
-    Workmanager().registerOneOffTask("3", TT_TEST_TASK, inputData: {});
+  void _dispatchTestTask() {
+    Workmanager().registerOneOffTask("3", ttTestTask, inputData: {});
   }
 
-  static Future<bool> _handleStartupTasks(Map<String, dynamic>? data) async {
+  Future<bool> _handleStartupTask(Map<String, dynamic>? data) async {
     final tasks = await getAllTasks();
     for (var task in tasks) {
       if (!task.isUploaded) {
@@ -132,20 +135,20 @@ class BackgroundUpload {
     return true;
   }
 
-  static Future<bool> _handleSingleTask(Map<String, dynamic> data) async {
+  Future<bool> _handleSingleTask(Map<String, dynamic> data) async {
     final task = UploadJob.fromJson(data);
     task.save();
     _uploadTask(task);
     return true;
   }
 
-  static Future<bool> _handleTestTask(Map<String, dynamic>? data) async {
+  Future<bool> _handleTestTask(Map<String, dynamic>? data) async {
     print("=============Test task==============");
     return true;
   }
 
-  static void _uploadTask(UploadJob task) async {
-    for (var i = 0; i < RETRY_COUNT; i++) {
+  void _uploadTask(UploadJob task) async {
+    for (var i = 0; i < retryCount; i++) {
       final uploadDone = await _upload(task);
       if (uploadDone) {
         task.isUploaded = true;
@@ -155,7 +158,7 @@ class BackgroundUpload {
     }
   }
 
-  static Future<bool> _upload(UploadJob task) async {
+  Future<bool> _upload(UploadJob task) async {
     try {
       await FirebaseStorage.instance
           .ref(task.storagePath)

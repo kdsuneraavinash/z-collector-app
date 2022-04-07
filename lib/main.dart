@@ -24,7 +24,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final loggedInUser = await FirebaseAuth.instance.userChanges().first;
-  BackgroundUpload.initialize();
+  BackgroundUpload.instance.initialize();
   runApp(MyApp(loggedIn: loggedInUser != null));
 }
 

@@ -9,8 +9,8 @@ class UploadTaskList extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(title: const Text("Record Assets")),
-        body: FutureBuilder<List<UploadTask>>(
-          future: BackgroundUpload.getAllTasks(),
+        body: FutureBuilder<List<UploadJob>>(
+          future: BackgroundUpload.instance.getAllTasks(),
           builder: (context, snapshot) {
             if (snapshot.hasData && (snapshot.data?.isNotEmpty ?? false)) {
               final data = snapshot.data!;

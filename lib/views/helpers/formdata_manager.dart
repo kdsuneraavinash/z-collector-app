@@ -121,7 +121,7 @@ class FormDataManager {
 
   void startUploading() async {
     for (final fileUpload in fileUploads) {
-      BackgroundUpload.dispatchBackgoundUploadTask(fileUpload);
+      BackgroundUpload.instance.dispatchBackgoundUploadTask(fileUpload);
     }
   }
 }
