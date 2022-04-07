@@ -5,19 +5,20 @@ import 'package:cross_file/cross_file.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:uuid/uuid.dart';
 import 'package:z_collector_app/models/project.dart';
 
 class FormDataManager {
   final String projectId;
   final String userId;
   final Project project;
-  final Map<String, Reference> fileUploads;
+  final List<UploadJob> fileUploads;
 
   FormDataManager({
     required this.projectId,
     required this.userId,
     required this.project,
-  }) : fileUploads = {};
+  }) : fileUploads = [];
 
   List<dynamic> extract(Map<String, dynamic> valueFields) {
     final values = [];
@@ -108,21 +109,31 @@ class FormDataManager {
   }
 
   String? _extractXFile(XFile file) {
-    final storageRef = FirebaseStorage.instance
-        .ref()
-        .child('projects')
-        .child(projectId)
-        .child(userId)
-        .child(file.name);
-    fileUploads[file.path] = storageRef;
+    final storageRef =
+        FirebaseStorage.instance.ref().child('files').child(const Uuid().v4());
+    fileUploads.add(UploadJob(
+      filePath: file.path,
+      storagePath: storageRef.fullPath,
+    ));
     return storageRef.fullPath;
   }
 
   void startUploading() async {
-    // TODO: Support uploading after app exits.
-    // TODO: Support progress notifications
-    for (final fileUpload in fileUploads.entries) {
-      fileUpload.value.putFile(File(fileUpload.key));
+    for (final fileUpload in fileUploads) {
+      // TODO: Submit upload job instead
+      FirebaseStorage.instance
+          .refFromURL(fileUpload.storagePath)
+          .putFile(File(fileUpload.filePath));
     }
   }
+}
+
+class UploadJob {
+  final String filePath;
+  final String storagePath;
+
+  UploadJob({
+    required this.filePath,
+    required this.storagePath,
+  });
 }
