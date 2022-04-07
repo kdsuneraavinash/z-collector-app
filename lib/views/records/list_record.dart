@@ -2,11 +2,11 @@ import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/models/user.dart';
 import 'package:z_collector_app/views/helpers/firebase_builders.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class ListRecordPage extends StatelessWidget {
   final String projectId;
@@ -33,7 +33,8 @@ class ListRecordPage extends StatelessWidget {
             // Construct query
             final recordQuery = FirebaseFirestore.instance
                 .collection('records')
-                .where('project', isEqualTo: projectRef);
+                .where('project', isEqualTo: projectRef)
+                .orderBy('timestamp', descending: true);
             final query = isOwner
                 ? recordQuery
                 : recordQuery.where('user', isEqualTo: currentUserRef);

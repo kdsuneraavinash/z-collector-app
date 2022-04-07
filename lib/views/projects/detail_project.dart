@@ -69,6 +69,7 @@ class PrivateProjectEntryPage extends StatelessWidget {
   final String projectId;
   final Project project;
   final String currentUserId;
+
   const PrivateProjectEntryPage(
       {Key? key,
       required this.project,
@@ -203,13 +204,28 @@ class DetailProjectView extends StatelessWidget {
               },
             ),
           ),
-        if (isOwner)
+        if (isOwner && project.isPublished)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: ElevatedButton.icon(
               label: const Text("Share Project"),
               icon: const Icon(Icons.share),
               onPressed: _showShareDialog,
+              style: ElevatedButton.styleFrom(primary: Colors.green),
+            ),
+          ),
+        if (isOwner && !project.isPublished)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: ElevatedButton.icon(
+              label: const Text("Publish Project"),
+              icon: const Icon(Icons.publish),
+              onPressed: () async {
+                await FirebaseFirestore.instance
+                    .collection('projects')
+                    .doc(projectId)
+                    .update({'isPublished': true});
+              },
               style: ElevatedButton.styleFrom(primary: Colors.green),
             ),
           ),
