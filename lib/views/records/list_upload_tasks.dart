@@ -18,19 +18,15 @@ class UploadTaskList extends StatelessWidget {
               final data = snapshot.data!;
               return ListView.builder(
                 itemCount: data.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(data[index].filePath.length > 25
-                        ? "...${data[index].filePath.substring(data[index].filePath.length - 25)}"
-                        : data[index].filePath),
-                    trailing: Icon(
-                      data[index].isUploaded
-                          ? Icons.check_circle
-                          : Icons.hourglass_bottom,
-                      color:
-                          data[index].isUploaded ? Colors.green : Colors.blue,
-                    ),
+                itemBuilder: (context, index) => ListTile(
+                  title: Text(data[index].filePath.length > 25
+                      ? "...${data[index].filePath.substring(data[index].filePath.length - 25)}"
+                      : data[index].filePath),
+                  trailing: Icon(
+                    data[index].isUploaded
+                        ? Icons.check_circle
+                        : Icons.hourglass_bottom,
+                    color: data[index].isUploaded ? Colors.green : Colors.blue,
                   ),
                 ),
               );

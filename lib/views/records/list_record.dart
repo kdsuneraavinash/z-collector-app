@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:beamer/beamer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:uuid/uuid.dart';
 import 'package:z_collector_app/models/project.dart';
 import 'package:z_collector_app/models/record.dart';
 import 'package:z_collector_app/models/user.dart';
@@ -44,10 +49,32 @@ class ListRecordPage extends StatelessWidget {
               appBar: AppBar(
                 title: const Text('Record List'),
                 actions: [
-                  IconButton(
-                      onPressed: () =>
-                          _downloadRecords(projectRef, project, query),
-                      icon: const Icon(Icons.download))
+                  Builder(builder: (context) {
+                    return IconButton(
+                        onPressed: () async {
+                          Directory? directory =
+                              await getExternalStorageDirectory();
+                          directory ??=
+                              await getApplicationDocumentsDirectory();
+
+                          String? path = await FilesystemPicker.open(
+                            title: 'Save to folder',
+                            context: context,
+                            rootDirectory: directory,
+                            fsType: FilesystemType.folder,
+                            pickText: 'Save file to this folder',
+                            folderIconColor: Colors.teal,
+                          );
+                          if (path == null) return;
+
+                          final fileName = await _downloadRecords(
+                              path, projectRef, project, query);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content:
+                                  Text('Records downloaded to $fileName')));
+                        },
+                        icon: const Icon(Icons.download));
+                  })
                 ],
               ),
               // Guard for user is owner
@@ -80,8 +107,8 @@ class ListRecordPage extends StatelessWidget {
     );
   }
 
-  void _downloadRecords(DocumentReference projectRef, Project project,
-      Query<Map<String, dynamic>> query) async {
+  Future<String> _downloadRecords(String location, DocumentReference projectRef,
+      Project project, Query<Map<String, dynamic>> query) async {
     // Get records
     final queryResults = await query.get();
     final records = queryResults.docs.map((e) => Record.fromJson(e.data()));
@@ -105,8 +132,14 @@ class ListRecordPage extends StatelessWidget {
     final csvData = [headers, ...records.map(recordGen).toList()];
     String csv = const ListToCsvConverter().convert(csvData);
 
-    // TODO: Download file
     print(csv);
+    return await _write(location, csv);
+  }
+
+  Future<String> _write(String location, String text) async {
+    final File file = File('$location/records-${const Uuid().v4()}.txt');
+    await file.writeAsString(text);
+    return file.path;
   }
 }
 

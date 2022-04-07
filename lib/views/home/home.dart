@@ -65,7 +65,8 @@ class HomePage extends StatelessWidget {
               trailing: const Icon(Icons.logout),
               onTap: () {
                 FirebaseAuth.instance.signOut();
-                Beamer.of(context).popToNamed("/login");
+                Beamer.of(context).beamingHistory.clear();
+                Beamer.of(context).beamToNamed("/login");
               },
             ),
           ],

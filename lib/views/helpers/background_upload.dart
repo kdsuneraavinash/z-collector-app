@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_android/shared_preferences_android.dart';
+import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:z_collector_app/firebase_options.dart';
 
@@ -18,7 +19,7 @@ class UploadJob {
     required this.filePath,
     required this.storagePath,
     this.isUploaded = false,
-  }) : id = storagePath;
+  }) : id = const Uuid().v4();
 
   factory UploadJob.fromJson(Map<String, dynamic> data) {
     return UploadJob(
@@ -90,7 +91,7 @@ class BackgroundUpload {
 
   static void dispatchBackgroundUploadTask(UploadJob task) {
     Workmanager().registerOneOffTask(
-      "1",
+      const Uuid().v4(),
       ttSingleTask,
       inputData: task.toJson(),
     );
