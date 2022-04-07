@@ -6,13 +6,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UploadTask {
   final String id;
   bool isUploaded;
-  String filePath;
-  String storagePath;
+  final String filePath;
+  final String storagePath;
 
   UploadTask({
-    required this.isUploaded,
     required this.filePath,
     required this.storagePath,
+    this.isUploaded = false,
   }) : id = storagePath;
 
   factory UploadTask.fromJson(Map<String, dynamic> data) {
@@ -70,15 +70,16 @@ class UploadTask {
 class BackgroundUpload {
   static const TT_SINGLE_TASK = "TT_SINGLE_TASK";
   static const TT_STARTUP_TASKS = "TT_STARTUP_TASKS";
+  static const TT_TEST_TASK = "TT_TEST_TASK";
   static const RETRY_COUNT = 3;
 
   static void initialize() {
     Workmanager().initialize(
-        callbackDispatcher, // The top level function, aka callbackDispatcher
-        isInDebugMode:
-            true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-        );
-    dispatchStatupTasks();
+      callbackDispatcher,
+      isInDebugMode: true,
+    );
+    _dispatchStatupTasks();
+    _dispatchTestTask();
   }
 
   static void callbackDispatcher() {
@@ -90,7 +91,9 @@ class BackgroundUpload {
           case TT_SINGLE_TASK:
             return _handleSingleTask(inputData!);
           case TT_STARTUP_TASKS:
-            return _handleStartupTasks();
+            return _handleStartupTasks(inputData);
+          case TT_TEST_TASK:
+            return _handleTestTask(inputData);
         }
         return Future.value(true);
       },
@@ -109,11 +112,15 @@ class BackgroundUpload {
     );
   }
 
-  static void dispatchStatupTasks() {
-    Workmanager().registerOneOffTask("2", TT_STARTUP_TASKS);
+  static void _dispatchStatupTasks() {
+    Workmanager().registerOneOffTask("2", TT_STARTUP_TASKS, inputData: {});
   }
 
-  static Future<bool> _handleStartupTasks() async {
+  static void _dispatchTestTask() {
+    Workmanager().registerOneOffTask("3", TT_TEST_TASK, inputData: {});
+  }
+
+  static Future<bool> _handleStartupTasks(Map<String, dynamic>? data) async {
     final tasks = await getAllTasks();
     for (var task in tasks) {
       if (!task.isUploaded) {
@@ -130,6 +137,11 @@ class BackgroundUpload {
     return true;
   }
 
+  static Future<bool> _handleTestTask(Map<String, dynamic>? data) async {
+    print("=============Test task==============");
+    return true;
+  }
+
   static void _uploadTask(UploadTask task) async {
     for (var i = 0; i < RETRY_COUNT; i++) {
       final uploadDone = await _upload(task);
@@ -141,7 +153,7 @@ class BackgroundUpload {
     }
   }
 
-  static Future<bool> _upload(UploadTask task) {
+  static Future<bool> _upload(UploadTask task) async {
     // TODO: Add upload logic
     // Write task in shared preferences (seriealized) with unique id
     // Start upload (retry if failed)
@@ -149,6 +161,6 @@ class BackgroundUpload {
 
     // Changes to database
     // New files collection to store all files and the status of the upload
-    return Future.value(true);
+    return true;
   }
 }
