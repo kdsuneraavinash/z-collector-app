@@ -2,6 +2,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:z_collector_app/models/project.dart';
+import 'package:z_collector_app/views/helpers/snackbar_messages.dart';
 
 class RecordFileFieldTile extends StatelessWidget {
   final ProjectField field;
@@ -26,8 +27,13 @@ class RecordFileFieldTile extends StatelessWidget {
       subtitle: const Text("Tap to open"),
       trailing: const Icon(Icons.open_in_browser),
       onTap: () async {
-        final url = await FirebaseStorage.instance.ref(value).getDownloadURL();
-        await launch(url);
+        try {
+          final url =
+              await FirebaseStorage.instance.ref(value).getDownloadURL();
+          await launch(url);
+        } catch (e) {
+          showErrorMessage(context, "File is not uploaded correctly");
+        }
       },
     );
   }
