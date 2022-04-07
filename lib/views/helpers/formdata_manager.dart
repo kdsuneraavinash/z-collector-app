@@ -122,7 +122,7 @@ class FormDataManager {
     for (final fileUpload in fileUploads) {
       // TODO: Submit upload job instead
       FirebaseStorage.instance
-          .refFromURL(fileUpload.storagePath)
+          .ref(fileUpload.storagePath)
           .putFile(File(fileUpload.filePath));
     }
   }
