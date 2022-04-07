@@ -54,6 +54,7 @@ dependencies:
   otp_text_field: ^1.1.2
   url_launcher: ^6.0.20
   workmanager: ^0.4.1
+  shared_preferences: ^2.0.13
   uuid: ^3.0.6
 
 dev_dependencies:

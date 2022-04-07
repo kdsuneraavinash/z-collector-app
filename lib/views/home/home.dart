@@ -55,6 +55,12 @@ class HomePage extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
+              title: const Text("Record Assets"),
+              onTap: () =>
+                  Beamer.of(context).beamToNamed('/home/record-assets'),
+            ),
+            const Divider(),
+            ListTile(
               title: const Text("Logout"),
               trailing: const Icon(Icons.logout),
               onTap: () {
