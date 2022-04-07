@@ -21,9 +21,16 @@ class UploadTaskList extends StatelessWidget {
                 itemBuilder: (context, index) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
-                    title: Text(data[index].filePath),
+                    title: Text(data[index].filePath.length > 25
+                        ? "...${data[index].filePath.substring(data[index].filePath.length - 25)}"
+                        : data[index].filePath),
                     trailing: Icon(
-                        data[index].isUploaded ? Icons.done : Icons.upload),
+                      data[index].isUploaded
+                          ? Icons.check_circle
+                          : Icons.hourglass_bottom,
+                      color:
+                          data[index].isUploaded ? Colors.green : Colors.blue,
+                    ),
                   ),
                 ),
               );
