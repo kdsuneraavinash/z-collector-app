@@ -7,6 +7,7 @@ import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
 import 'package:z_collector_app/models/project.dart';
+import 'package:z_collector_app/views/helpers/background_upload.dart';
 
 class FormDataManager {
   final String projectId;
@@ -120,20 +121,7 @@ class FormDataManager {
 
   void startUploading() async {
     for (final fileUpload in fileUploads) {
-      // TODO: Submit upload job instead
-      FirebaseStorage.instance
-          .ref(fileUpload.storagePath)
-          .putFile(File(fileUpload.filePath));
+      BackgroundUpload.dispatchBackgoundUploadTask(fileUpload);
     }
   }
-}
-
-class UploadJob {
-  final String filePath;
-  final String storagePath;
-
-  UploadJob({
-    required this.filePath,
-    required this.storagePath,
-  });
 }

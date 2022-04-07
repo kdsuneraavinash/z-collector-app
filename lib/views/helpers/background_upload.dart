@@ -1,22 +1,24 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UploadTask {
+class UploadJob {
   final String id;
   bool isUploaded;
   final String filePath;
   final String storagePath;
 
-  UploadTask({
+  UploadJob({
     required this.filePath,
     required this.storagePath,
     this.isUploaded = false,
   }) : id = storagePath;
 
-  factory UploadTask.fromJson(Map<String, dynamic> data) {
-    return UploadTask(
+  factory UploadJob.fromJson(Map<String, dynamic> data) {
+    return UploadJob(
       isUploaded: data['isUploaded'] as bool,
       filePath: data['filePath'] as String,
       storagePath: data['storagePath'] as String,
@@ -35,14 +37,14 @@ class UploadTask {
     return json.encode(toJson());
   }
 
-  static Future<List<UploadTask>> getAll() async {
+  static Future<List<UploadJob>> getAll() async {
     final prefs = await SharedPreferences.getInstance();
     final String? tasks = prefs.getString('tasks');
     if (tasks == null) {
       return [];
     }
     return (json.decode(tasks) as List)
-        .map((item) => UploadTask.fromJson(item))
+        .map((item) => UploadJob.fromJson(item))
         .toList();
   }
 
@@ -60,7 +62,7 @@ class UploadTask {
 
   @override
   bool operator ==(Object other) {
-    return other is UploadTask && hashCode == other.hashCode;
+    return other is UploadJob && hashCode == other.hashCode;
   }
 
   @override
@@ -100,11 +102,11 @@ class BackgroundUpload {
     );
   }
 
-  static Future<List<UploadTask>> getAllTasks() async {
-    return UploadTask.getAll();
+  static Future<List<UploadJob>> getAllTasks() async {
+    return UploadJob.getAll();
   }
 
-  static void dispatchBackgoundUploadTask(UploadTask task) {
+  static void dispatchBackgoundUploadTask(UploadJob task) {
     Workmanager().registerOneOffTask(
       "1",
       TT_SINGLE_TASK,
@@ -131,7 +133,7 @@ class BackgroundUpload {
   }
 
   static Future<bool> _handleSingleTask(Map<String, dynamic> data) async {
-    final task = UploadTask.fromJson(data);
+    final task = UploadJob.fromJson(data);
     task.save();
     _uploadTask(task);
     return true;
@@ -142,7 +144,7 @@ class BackgroundUpload {
     return true;
   }
 
-  static void _uploadTask(UploadTask task) async {
+  static void _uploadTask(UploadJob task) async {
     for (var i = 0; i < RETRY_COUNT; i++) {
       final uploadDone = await _upload(task);
       if (uploadDone) {
@@ -153,14 +155,14 @@ class BackgroundUpload {
     }
   }
 
-  static Future<bool> _upload(UploadTask task) async {
-    // TODO: Add upload logic
-    // Write task in shared preferences (seriealized) with unique id
-    // Start upload (retry if failed)
-    // Remove shared preferences entry after done
-
-    // Changes to database
-    // New files collection to store all files and the status of the upload
-    return true;
+  static Future<bool> _upload(UploadJob task) async {
+    try {
+      await FirebaseStorage.instance
+          .ref(task.storagePath)
+          .putFile(File(task.filePath));
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
