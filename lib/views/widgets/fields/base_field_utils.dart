@@ -3,34 +3,30 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:z_collector_app/models/project.dart';
 
 class BaseFieldUtils {
-  static FormFieldValidator<T>? buildValidators<T>(
-      BuildContext context, ProjectField field) {
+  static FormFieldValidator<T>? buildValidators<T>(BuildContext context, ProjectField field) {
     if (field.validators.isEmpty) return null;
     // If only one validator, simply construct it.
     if (field.validators.length == 1) {
       return buildValidator(field.validators[0], context);
     }
     // If there are multiple, componse them.
-    final validators =
-        field.validators.map((v) => buildValidator(v, context)).toList();
+    final validators = field.validators.map((v) => buildValidator(v, context)).toList();
     return FormBuilderValidators.compose(validators);
   }
 
-  static FormFieldValidator<T> buildValidator<T>(
-      ProjectFieldValidator validator, BuildContext context) {
+  static FormFieldValidator<T> buildValidator<T>(ProjectFieldValidator validator, BuildContext context) {
     if (validator.type == ProjectFieldValidatorType.required) {}
 
     switch (validator.type) {
       case ProjectFieldValidatorType.required:
         return FormBuilderValidators.required(context);
       case ProjectFieldValidatorType.email:
-        return FormBuilderValidators.email(context) as FormFieldValidator<T>;
+        return (dynamic value) => FormBuilderValidators.email(context)(value.toString());
       case ProjectFieldValidatorType.integer:
         return FormBuilderValidators.integer(context) as FormFieldValidator<T>;
       case ProjectFieldValidatorType.match:
         final value = validator.value as String;
-        return FormBuilderValidators.match(context, value)
-            as FormFieldValidator<T>;
+        return FormBuilderValidators.match(context, value) as FormFieldValidator<T>;
       case ProjectFieldValidatorType.max:
         final value = validator.value as num;
         return FormBuilderValidators.max(context, value);
